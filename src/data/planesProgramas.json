@@ -1,0 +1,179 @@
+{
+  "meta": {
+    "ciclo_vigente": "2024-2025",
+    "ultima_actualizacion": "2025-01-15",
+    "descripcion_general": "Seguimiento a la actualización curricular, alineación al marco legal vigente y grado de implementación por nivel educativo."
+  },
+  "estatus_catalogo": [
+    {
+      "id": "vigente",
+      "etiqueta": "Vigente"
+    },
+    {
+      "id": "en_transicion",
+      "etiqueta": "En transición"
+    },
+    {
+      "id": "en_revision",
+      "etiqueta": "En revisión"
+    }
+  ],
+  "resumen_estatus": {
+    "total_planes": 12,
+    "vigentes": 6,
+    "en_transicion": 4,
+    "en_revision": 2
+  },
+  "niveles": [
+    {
+      "id": "basica",
+      "nombre": "Educación Básica",
+      "subniveles": [
+        {
+          "id": "preescolar",
+          "nombre": "Preescolar",
+          "planes": [
+            {
+              "id": "pre_2022",
+              "nombre": "Plan de Estudio 2022",
+              "anio_aprobacion": 2022,
+              "estatus": "vigente",
+              "porcentaje_implementacion": 85,
+              "alineacion_marco_legal": 95,
+              "descripcion_breve": "Reorganización curricular con enfoque en campos formativos, inclusión y trabajo por proyectos.",
+              "documento_oficial_url": "#"
+            },
+            {
+              "id": "pre_2011",
+              "nombre": "Plan 2011",
+              "anio_aprobacion": 2011,
+              "estatus": "en_transicion",
+              "porcentaje_implementacion": 15,
+              "alineacion_marco_legal": 70,
+              "descripcion_breve": "Plan de referencia que coexiste en grupos multigrado y contextos específicos.",
+              "documento_oficial_url": "#"
+            }
+          ]
+        },
+        {
+          "id": "primaria",
+          "nombre": "Primaria",
+          "planes": [
+            {
+              "id": "pri_2022",
+              "nombre": "Plan de Estudio 2022",
+              "anio_aprobacion": 2022,
+              "estatus": "vigente",
+              "porcentaje_implementacion": 78,
+              "alineacion_marco_legal": 94,
+              "descripcion_breve": "Énfasis en la reorganización de contenidos en campos formativos y proyectos integradores.",
+              "documento_oficial_url": "#"
+            },
+            {
+              "id": "pri_2011",
+              "nombre": "Plan 2011",
+              "anio_aprobacion": 2011,
+              "estatus": "en_transicion",
+              "porcentaje_implementacion": 22,
+              "alineacion_marco_legal": 72,
+              "descripcion_breve": "Plan en proceso de sustitución gradual por el Plan 2022.",
+              "documento_oficial_url": "#"
+            }
+          ]
+        },
+        {
+          "id": "secundaria",
+          "nombre": "Secundaria",
+          "planes": [
+            {
+              "id": "sec_2022",
+              "nombre": "Plan de Estudio 2022",
+              "anio_aprobacion": 2022,
+              "estatus": "vigente",
+              "porcentaje_implementacion": 70,
+              "alineacion_marco_legal": 92,
+              "descripcion_breve": "Articulación con los campos formativos de educación básica y enfoque en trabajo colegiado.",
+              "documento_oficial_url": "#"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "media_superior",
+      "nombre": "Educación Media Superior",
+      "subniveles": [
+        {
+          "id": "b_general",
+          "nombre": "Bachillerato General",
+          "planes": [
+            {
+              "id": "ems_acuerdo_653",
+              "nombre": "Marco Curricular Común (Acuerdo 653)",
+              "anio_aprobacion": 2012,
+              "estatus": "vigente",
+              "porcentaje_implementacion": 100,
+              "alineacion_marco_legal": 90,
+              "descripcion_breve": "Organiza competencias genéricas, disciplinares y profesionales comunes a la EMS.",
+              "documento_oficial_url": "#"
+            }
+          ]
+        },
+        {
+          "id": "b_tecnologico",
+          "nombre": "Bachillerato Tecnológico",
+          "planes": [
+            {
+              "id": "ems_mt",
+              "nombre": "Modelo de Educación Media Superior Tecnológica",
+              "anio_aprobacion": 2015,
+              "estatus": "en_revision",
+              "porcentaje_implementacion": 80,
+              "alineacion_marco_legal": 85,
+              "descripcion_breve": "Articula formación propedéutica con formación tecnológica y profesional.",
+              "documento_oficial_url": "#"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "superior",
+      "nombre": "Educación Superior",
+      "subniveles": [
+        {
+          "id": "licenciatura",
+          "nombre": "Licenciatura",
+          "planes": [
+            {
+              "id": "lic_educacion_2018",
+              "nombre": "Licenciaturas en Educación (2018)",
+              "anio_aprobacion": 2018,
+              "estatus": "vigente",
+              "porcentaje_implementacion": 88,
+              "alineacion_marco_legal": 93,
+              "descripcion_breve": "Planes renovados para la formación inicial docente con énfasis en práctica y reflexión crítica.",
+              "documento_oficial_url": "#"
+            }
+          ]
+        },
+        {
+          "id": "posgrado",
+          "nombre": "Posgrado",
+          "planes": [
+            {
+              "id": "pos_educacion",
+              "nombre": "Programas de Posgrado en Educación",
+              "anio_aprobacion": 2020,
+              "estatus": "en_revision",
+              "porcentaje_implementacion": 60,
+              "alineacion_marco_legal": 88,
+              "descripcion_breve": "Actualización de líneas de generación y aplicación del conocimiento en educación.",
+              "documento_oficial_url": "#"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

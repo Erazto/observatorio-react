@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "nivel": "media_superior",
+    "unidad": "alumnos",
+    "fuente": "Consolidado 911 y proyecciones internas"
+  },
+  "series": [
+    {
+      "ciclo": "2019-20",
+      "valor": 667805
+    },
+    {
+      "ciclo": "2020-21",
+      "valor": 655828
+    },
+    {
+      "ciclo": "2021-22",
+      "valor": 647387
+    },
+    {
+      "ciclo": "2022-23",
+      "valor": 667189
+    },
+    {
+      "ciclo": "2023-24",
+      "valor": 675989
+    },
+    {
+      "ciclo": "2024-25",
+      "valor": 646810
+    },
+    {
+      "ciclo": "2025-26",
+      "valor": 660000
+    },
+    {
+      "ciclo": "2026-27",
+      "valor": 675000
+    },
+    {
+      "ciclo": "2027-28",
+      "valor": 690000
+    },
+    {
+      "ciclo": "2028-29",
+      "valor": 705000
+    },
+    {
+      "ciclo": "2029-30",
+      "valor": 720000
+    }
+  ]
+}
