@@ -210,7 +210,7 @@ function App() {
         <div className="header-title">
           <h1>Observatorio Educativo del Estado de México</h1>
         </div>
-        <h2>Evaluación del Sistema Educativo Estatal</h2>
+        <h2>Sistema Educativo Estatal</h2>
       </header>
 
       <nav aria-label="Navegación principal" className="main-nav">
@@ -330,9 +330,9 @@ function App() {
       <footer role="contentinfo">
         <div className="footer-content">
           <p>Observatorio Educativo del Estado de México © 2025</p>
-          <p>Datos oficiales 2019-2030 | Última actualización: Enero 2025</p>
+          <p>Desarrollo del ISCEEM 2025</p>
           <small>
-            Fuente: Consolidado Estadístico 911 - Secretaría Técnica del Estado de México
+            Coordinación de Evaluación del Sistema Educativo Estatal
           </small>
           <div className="footer-links">
             <a href="#acerca" aria-label="Acerca del observatorio">
