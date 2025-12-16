@@ -376,6 +376,27 @@ function EscuelasSection({
         </div>
       </div>
 
+      <div className="chart-section">
+        <h3 className="chart-title">
+          Escuelas Públicas vs Privadas (Modalidad Escolarizada)
+        </h3>
+        <div className="chart-container">
+          <div
+            style={{
+              position: 'relative',
+              height: 300,
+              maxWidth: 420,
+              margin: '0 auto',
+            }}
+          >
+            <canvas
+              ref={pieChartCanvasRef}
+              aria-label="Gráfico de distribución de escuelas públicas y privadas"
+            ></canvas>
+          </div>
+        </div>
+      </div>
+
       <div style={{ marginTop: '50px' }}>
         <h3 className="chart-title" style={{ fontSize: '1.8em' }}>
           Escuelas por Vertiente
@@ -501,15 +522,6 @@ function EscuelasSection({
         </div>
       </div>
 
-      <div className="pie-container">
-        <h3 className="chart-title">
-          Escuelas Públicas y Privadas (Modalidad Escolarizada)
-        </h3>
-        <canvas
-          ref={pieChartCanvasRef}
-          aria-label="Gráfico de distribución de escuelas públicas y privadas"
-        ></canvas>
-      </div>
     </section>
   )
 }

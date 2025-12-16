@@ -270,27 +270,49 @@ function App() {
           <div className="welcome-module" id="welcome-module">
             <h3>Bienvenido al Observatorio Educativo</h3>
             <p>
-              El Observatorio Educativo del Estado de México surge como un espacio
-              público de referencia para la investigación, donde convergen los datos,
-              los análisis y los hallazgos generados por la comunidad del ISCEEM y por
-              las autoridades educativas estatales.
-            </p>
-            <p>
-              Aquí podrás consultar de manera integrada los indicadores oficiales
-              2019-2030 sobre docentes, estudiantes, infraestructura, planes y
-              programas, así como explorar la geografía educativa mediante un mapa
-              interactivo. Cada sección está acompañada de visualizaciones dinámicas
-              que facilitan la comparación temporal y territorial.
-            </p>
-            <p>
+              <strong>El Observatorio Educativo del Estado de México</strong> es una
+              iniciativa desarrollada en el{' '}
               <strong>
-                Selecciona un apartado del menú para activar los tableros y generar
-                evidencias que respalden estudios, políticas y proyectos de mejora.
+                Instituto Superior de Ciencias de la Educación del Estado de México
+                (ISCEEM)
               </strong>
+              , concebida como un espacio público, académico y técnico de referencia
+              para la investigación, el análisis y la sistematización de información
+              del Sistema Educativo Estatal.
+            </p>
+            <p>
+              Uno de los principales retos para el análisis educativo es la dispersión
+              de la información en múltiples fuentes, formatos y plataformas, lo que
+              dificulta su consulta, comparación y aprovechamiento para la
+              investigación, la planeación y la toma de decisiones. Frente a este
+              escenario, el Observatorio tiene como propósito concentrar, organizar y
+              articular <strong>información educativa relevante</strong> en un solo
+              entorno, facilitando su uso por parte de la comunidad educativa en su
+              conjunto.
+            </p>
+            <p>
+              En este sitio convergen <strong>datos oficiales</strong>,{' '}
+              <strong>indicadores estadísticos</strong>, análisis e interpretaciones
+              especializadas generadas tanto por la comunidad académica del ISCEEM como
+              por las autoridades educativas estatales, ofreciendo una visión integrada
+              de los procesos educativos del Estado de México.
+            </p>
+            <p>
+              Aquí podrás consultar de manera sistemática los{' '}
+              <strong>indicadores oficiales</strong> sobre docentes, estudiantes,
+              escuelas, infraestructura, planes y programas educativos, así como
+              explorar la geografía educativa estatal mediante{' '}
+              <strong>mapas interactivos</strong>. Cada sección incorpora
+              visualizaciones dinámicas y comparativas, diseñadas para apoyar el
+              análisis temporal y territorial, reducir barreras técnicas y promover el
+              uso informado de los datos.
             </p>
             <p style={{ marginTop: 12, color: 'var(--gray)' }}>
-              Hasta que elijas un apartado, mantenemos ocultas las gráficas para
-              que puedas revisar esta reseña inicial con calma.
+              El Observatorio Educativo del Estado de México busca consolidarse como
+              una <strong>herramienta estratégica</strong> para la{' '}
+              <strong>evaluación, la planeación y la mejora continua</strong> del
+              sistema educativo estatal, fortaleciendo una cultura institucional del
+              uso de la información y la evidencia al servicio de la educación.
             </p>
           </div>
         )}

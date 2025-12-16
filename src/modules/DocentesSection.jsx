@@ -507,28 +507,6 @@ function DocentesSection({
         </div>
       </div>
 
-      <div className="knowledge-dashboard">
-        <h2 className="chart-title">
-          2. Evaluación de Conocimiento y Desempeño Docente
-        </h2>
-        <div className="kd-knowledge">
-          <div className="kd-knowledge-card">
-            <canvas id="startingChart" ref={startingChartRef}></canvas>
-            <h3>{docentesData.conocimiento.inicial}%</h3>
-            <p>Conocimiento Inicial</p>
-          </div>
-          <div className="kd-knowledge-card">
-            <canvas id="currentChart" ref={currentChartRef}></canvas>
-            <h3>{docentesData.conocimiento.actual}%</h3>
-            <p>Conocimiento Actual</p>
-          </div>
-          <div className="kd-knowledge-card gain">
-            <canvas id="gainChart" ref={gainChartRef}></canvas>
-            <h3>+{docentesData.conocimiento.mejora}%</h3>
-            <p>Mejora Total</p>
-          </div>
-        </div>
-      </div>
     </section>
   )
 }

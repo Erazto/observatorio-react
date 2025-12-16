@@ -188,23 +188,17 @@ header h2 {
   overflow: hidden;
 }
 
-.welcome-module::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url('/welcome-bg.svg');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  pointer-events: none;
-}
-
 .welcome-module h3 {
   text-align: center;
 }
 
 .welcome-module p {
   text-align: justify;
+  margin-bottom: 1.2rem;
+}
+
+.welcome-module p:last-child {
+  margin-bottom: 0;
 }
 
 .welcome-module.hidden {
@@ -552,6 +546,8 @@ main {
 }
 
 /* ===== GRÁFICOS ===== */
+.chart-section { margin-top: 40px; }
+
 .chart-container {
   background: white;
   padding: clamp(20px, 3vw, 25px);
@@ -564,15 +560,6 @@ main {
   color: var(--primary);
   font-size: clamp(1.3rem, 3vw, 1.6rem);
   margin-bottom: 20px;
-}
-
-.pie-container {
-  background: white;
-  padding: 30px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  text-align: center;
-  margin-top: 40px;
 }
 
 /* ===== MAPA INTERACTIVO ===== */
@@ -1012,8 +999,7 @@ footer {
     padding: 20px 15px;
   }
 
-  .chart-container,
-  .pie-container {
+  .chart-container {
     padding: 20px 15px;
   }
 
