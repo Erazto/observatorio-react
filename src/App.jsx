@@ -12,21 +12,6 @@ import seriesEMS from './data/series_matricula_ems.json'
 
 import Chart from './utils/chart'
 
-const HeaderObservatoryIcon = () => (
-  <svg viewBox="0 0 64 64" role="img" aria-hidden="true">
-    <g fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 50h8l4 12" />
-      <path d="M40 50h8l-4 12" />
-      <path d="M24 38 46 30l6 6-22 8-6-6Z" fill="#fff" stroke="none" />
-      <path d="M16 34 42 24" />
-      <path d="M46 20l6-4M50 26l8-2" />
-      <circle cx="22" cy="18" r="2" />
-      <circle cx="54" cy="34" r="2" />
-      <circle cx="10" cy="30" r="1.5" />
-    </g>
-  </svg>
-)
-
 function App() {
   const [activeSection, setActiveSection] = useState(null)
 
@@ -223,9 +208,6 @@ function App() {
 
       <header>
         <div className="header-title">
-          <span className="header-icon" aria-hidden="true">
-            <HeaderObservatoryIcon />
-          </span>
           <h1>Observatorio Educativo del Estado de México</h1>
         </div>
         <h2>Evaluación del Sistema Educativo Estatal</h2>
