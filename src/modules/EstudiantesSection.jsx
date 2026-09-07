@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef } from 'react'
-import estudiantesData from '../data/estudiantes.json'
 import { useFilters } from '../hooks/useFilters'
 import { filtrarNivelesEstudiantes } from '../utils/filterEstudiantes'
 import CoberturaEMS from "./CoberturaEMS";
@@ -23,7 +22,7 @@ const MACRO_CONFIG = [
   { id: 'superior', label: 'Superior', subtotalLabel: 'Subtotal Superior' },
 ]
 
-function EstudiantesSection({ isActive, sectionRef, matriculaChartCanvasRef }) {
+function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaChartCanvasRef }) {
   const {
     macroNivel,
     nivel,
@@ -36,7 +35,7 @@ function EstudiantesSection({ isActive, sectionRef, matriculaChartCanvasRef }) {
 
   const nivelesFiltrados = useMemo(
     () => filtrarNivelesEstudiantes(estudiantesData, filters),
-    [filters],
+    [filters, estudiantesData],
   )
   const showingGlobalTotals =
     macroNivel === 'todos' && nivel === 'todos' && control === 'todos'
@@ -195,6 +194,11 @@ function EstudiantesSection({ isActive, sectionRef, matriculaChartCanvasRef }) {
           <strong>{formatNumber(estudiantesData.meta.total_general)}</strong> alumnos
         </p>
       </div>
+
+      <p>El desglose por nivel corresponde a la modalidad escolarizada. El total general incluye ambas modalidades.</p>
+      {estudiantesData.meta.documento_url && (
+        <p><a href={`${estudiantesData.meta.documento_url}#page=${estudiantesData.meta.pagina_pdf}`} target="_blank" rel="noreferrer">Fuente: Consolidado de inicio 2025-2026 (PDF)</a></p>
+      )}
 
       <div className="filter-group">
         <div className="filter-field">
@@ -486,20 +490,28 @@ function EstudiantesSection({ isActive, sectionRef, matriculaChartCanvasRef }) {
               )}
 
               <tr className="total-row">
-                <td className="level-label">TOTAL GENERAL</td>
+                <td className="level-label">{showingGlobalTotals ? 'TOTAL GENERAL' : 'TOTAL FILTRADO (ESCOLARIZADA)'}</td>
                 {CONTROL_KEYS.map((key) => (
                   <td key={key}>
-                    {formatNumber(macroSummaries.overall[key])}
+                    {formatNumber(showingGlobalTotals ? estudiantesData.controles_totales[key] : macroSummaries.overall[key])}
                   </td>
                 ))}
-                <td>{formatNumber(macroSummaries.overall.total)}</td>
+                <td>{formatNumber(showingGlobalTotals ? estudiantesData.meta.total_general : macroSummaries.overall.total)}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-<CoberturaEMS />
+{estudiantesData.indicadores ? (
+        <div className="chart-container">
+          <h3>Cobertura en Educación Media Superior · {estudiantesData.meta.ciclo}</h3>
+          <p><strong>{estudiantesData.indicadores.cobertura_ems}%</strong> · Modalidad escolarizada y mixta.</p>
+          <p>La matrícula escolarizada es de {formatNumber(estudiantesData.subtotales_macro_nivel.media_superior.total)} estudiantes. Tiene un alcance distinto al indicador de cobertura.</p>
+          <p><a href={`${estudiantesData.meta.documento_url}#page=24`} target="_blank" rel="noreferrer">Consultar indicador oficial (PDF, página 24)</a></p>
+          <p>Las series y proyecciones anteriores se pueden consultar seleccionando el ciclo histórico 2024-2025.</p>
+        </div>
+      ) : <CoberturaEMS />}
 
     </section>
   )

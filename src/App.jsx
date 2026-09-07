@@ -5,14 +5,23 @@ import EscuelasSection from './modules/EscuelasSection'
 import PlanesSection from './modules/PlanesSection'
 import MapaInteractivoSection from './modules/MapaInteractivoSection'
 
-import docentesData from './data/docentes.json'
-import estudiantesData from './data/estudiantes.json'
-import escuelasData from './data/escuelas.json'
-import seriesEMS from './data/series_matricula_ems.json'
+import docentesActual from './data/docentes.json'
+import docentesHistorico from './data/historico/2024-2025/docentes.json'
+import estudiantesActual from './data/estudiantes.json'
+import estudiantesHistorico from './data/historico/2024-2025/estudiantes.json'
+import escuelasActual from './data/escuelas.json'
+import escuelasHistorico from './data/historico/2024-2025/escuelas.json'
+import seriesActual from './data/series_matricula_ems.json'
+import seriesHistorica from './data/historico/2024-2025/series_matricula_ems.json'
 
 import Chart from './utils/chart'
 
 function App() {
+  const [ciclo, setCiclo] = useState('2025-2026')
+  const seriesEMS = ciclo === '2025-2026' ? seriesActual : seriesHistorica
+  const docentesData = ciclo === '2025-2026' ? docentesActual : docentesHistorico
+  const estudiantesData = ciclo === '2025-2026' ? estudiantesActual : estudiantesHistorico
+  const escuelasData = ciclo === '2025-2026' ? escuelasActual : escuelasHistorico
   const [activeSection, setActiveSection] = useState(null)
 
   const docentesRef = useRef(null)
@@ -117,7 +126,7 @@ function App() {
                 label: (ctx) =>
                   `${ctx.label}: ${ctx.raw.toLocaleString(
                     'es-MX',
-                  )} (${((ctx.raw / escuelasData.meta.total_general) * 100).toFixed(
+                  )} (${((ctx.raw / (escuelasData.publico_privado_escolarizada.publicas + escuelasData.publico_privado_escolarizada.privadas)) * 100).toFixed(
                     1,
                   )}%)`,
               },
@@ -160,7 +169,7 @@ function App() {
       })
     }
 
-    if (startingChartRef.current) {
+    if (docentesData.conocimiento && startingChartRef.current) {
       createMiniChart(
         'startingChart',
         startingChartRef.current,
@@ -169,7 +178,7 @@ function App() {
         '#60a5fa',
       )
     }
-    if (currentChartRef.current) {
+    if (docentesData.conocimiento && currentChartRef.current) {
       createMiniChart(
         'currentChart',
         currentChartRef.current,
@@ -178,7 +187,7 @@ function App() {
         '#3b82f6',
       )
     }
-    if (gainChartRef.current) {
+    if (docentesData.conocimiento && gainChartRef.current) {
       createMiniChart(
         'gainChart',
         gainChartRef.current,
@@ -194,7 +203,7 @@ function App() {
         delete chartsRef.current[key]
       })
     }
-  }, [])
+  }, [ciclo])
 
   const handleNavClick = (sectionId) => {
     setActiveSection(sectionId)
@@ -210,7 +219,7 @@ function App() {
         <div className="header-title">
           <h1>Observatorio Educativo del Estado de México</h1>
         </div>
-        <h2>Sistema Educativo Estatal</h2>
+        <h2>Instituto Superior de Ciencias de la Educación del Estado de México</h2>
       </header>
 
       <nav aria-label="Navegación principal" className="main-nav">
@@ -266,6 +275,16 @@ function App() {
       </nav>
 
       <main id="main-content">
+        <div className="filter-group">
+          <div className="filter-field">
+            <label htmlFor="ciclo-escolar">Ciclo escolar de estadísticas</label>
+            <select id="ciclo-escolar" value={ciclo} onChange={(event) => setCiclo(event.target.value)}>
+              <option value="2025-2026">2025-2026 (actual)</option>
+              <option value="2024-2025">2024-2025 (histórico)</option>
+            </select>
+          </div>
+          <p>Aplica a estudiantes, docentes y escuelas. Planes y mapas indican sus propios periodos.</p>
+        </div>
         {!activeSection && (
           <div className="welcome-module" id="welcome-module">
             <h3>Bienvenido al Observatorio Educativo</h3>
@@ -318,6 +337,8 @@ function App() {
         )}
 
         <DocentesSection
+          key={`docentes-${ciclo}`}
+          docentesData={docentesData}
           isActive={activeSection === 'docentes'}
           sectionRef={docentesRef}
           startingChartRef={startingChartRef}
@@ -326,12 +347,16 @@ function App() {
         />
 
         <EstudiantesSection
+          key={`estudiantes-${ciclo}`}
+          estudiantesData={estudiantesData}
           isActive={activeSection === 'estudiantes'}
           sectionRef={estudiantesRef}
           matriculaChartCanvasRef={matriculaChartRef}
         />
 
         <EscuelasSection
+          key={`escuelas-${ciclo}`}
+          escuelasData={escuelasData}
           isActive={activeSection === 'escuelas'}
           sectionRef={escuelasRef}
           pieChartCanvasRef={pieEscuelasRef}

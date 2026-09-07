@@ -31,7 +31,9 @@
     },
     {
       "ciclo": "2025-26",
-      "valor": 660000
+      "valor": 638811,
+      "tipo": "observado",
+      "fuente": "/documentos/consolidado-inicio-2025-2026.pdf#page=10"
     },
     {
       "ciclo": "2026-27",

@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef } from 'react'
-import escuelasData from '../data/escuelas.json'
 import { useFilters } from '../hooks/useFilters'
 import { filtrarNivelesEscuelas } from '../utils/filterEscuelas'
 import Chart from '../utils/chart'
@@ -23,7 +22,7 @@ const CONTROL_LABELS = {
 }
 const CONTROL_COLORS = ['#c42d56', '#e8d4a8', '#a58570', '#00a89a']
 
-function EscuelasSection({
+function EscuelasSection({ escuelasData,
   isActive,
   sectionRef,
   pieChartCanvasRef,
@@ -40,7 +39,7 @@ function EscuelasSection({
 
   const nivelesFiltrados = useMemo(
     () => filtrarNivelesEscuelas(escuelasData, filters),
-    [filters],
+    [filters, escuelasData],
   )
   const showingGlobalTotals =
     macroNivel === 'todos' && nivel === 'todos' && control === 'todos'
@@ -197,6 +196,11 @@ function EscuelasSection({
           <strong>{formatNumber(escuelasData.meta.total_general)}</strong> escuelas
         </p>
       </div>
+
+      <p>El desglose por nivel corresponde a la modalidad escolarizada. El total general incluye ambas modalidades.</p>
+      {escuelasData.meta.documento_url && (
+        <p><a href={`${escuelasData.meta.documento_url}#page=${escuelasData.meta.pagina_pdf}`} target="_blank" rel="noreferrer">Fuente: Consolidado de inicio 2025-2026 (PDF)</a></p>
+      )}
 
       <div className="filter-group">
         <div className="filter-field">
@@ -509,13 +513,13 @@ function EscuelasSection({
               )}
 
               <tr className="total-row">
-                <td className="level-label">TOTAL</td>
+                <td className="level-label">{showingGlobalTotals ? 'TOTAL GENERAL' : 'TOTAL FILTRADO (ESCOLARIZADA)'}</td>
                 {CONTROL_KEYS.map((key) => (
                   <td key={key}>
-                    {formatNumber(macroSummaries.overall[key])}
+                    {formatNumber(showingGlobalTotals ? escuelasData.controles_totales[key] : macroSummaries.overall[key])}
                   </td>
                 ))}
-                <td>{formatNumber(macroSummaries.overall.total)}</td>
+                <td>{formatNumber(showingGlobalTotals ? escuelasData.meta.total_general : macroSummaries.overall.total)}</td>
               </tr>
             </tbody>
           </table>
