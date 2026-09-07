@@ -22,7 +22,7 @@ const CONTROL_LABELS = {
 }
 const CONTROL_COLORS = ['#c42d56', '#e8d4a8', '#a58570', '#00a89a']
 
-function EscuelasSection({ escuelasData,
+function EscuelasSection({ ciclo, onCicloChange, escuelasData,
   isActive,
   sectionRef,
   pieChartCanvasRef,
@@ -199,12 +199,18 @@ function EscuelasSection({ escuelasData,
         </p>
       </div>
 
-      <p>El desglose por nivel corresponde a la modalidad escolarizada. El total general incluye ambas modalidades.</p>
       {escuelasData.meta.documento_url && (
         <p><a href={`${escuelasData.meta.documento_url}#page=${escuelasData.meta.pagina_pdf}`} target="_blank" rel="noreferrer">Fuente: Consolidado de inicio 2025-2026 (PDF)</a></p>
       )}
 
-      <div className="filter-group">
+      <div className="filter-group statistics-filters">
+        <div className="filter-field">
+          <label htmlFor="escuelas-ciclo">Ciclo escolar</label>
+          <select id="escuelas-ciclo" value={ciclo} onChange={event => onCicloChange(event.target.value)}>
+            <option value="2025-2026">2025-2026 (actual)</option>
+            <option value="2024-2025">2024-2025 (histórico)</option>
+          </select>
+        </div>
         <div className="filter-field">
           <label htmlFor="escuelas-macroNivel">Macro nivel</label>
           <select id="escuelas-macroNivel" value={macroNivel} onChange={(e) => setMacroNivel(e.target.value)}>

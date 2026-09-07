@@ -74,3 +74,8 @@ main { max-width: 1440px; padding: clamp(16px, 3vw, 36px); margin-inline: auto; 
 .welcome-dialog .welcome-module h3 { font-size: clamp(1.5rem, 4vw, 2.25rem); }
 .footer-about { border: 0; background: none; color: inherit; cursor: pointer; text-decoration: underline; }
 .site-visits small { display: block; }
+
+/* Los cuatro filtros comparten una fila; en pantallas estrechas se puede desplazar. */
+.statistics-filters { display: grid; grid-template-columns: minmax(220px, 1.25fr) repeat(3, minmax(160px, 1fr)); align-items: end; gap: 16px; overflow-x: auto; }
+.statistics-filters .filter-field { min-width: 0; }
+.statistics-filters .filter-field select { width: 100%; }

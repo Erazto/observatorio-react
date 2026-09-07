@@ -21,7 +21,7 @@ const MACRO_CONFIG = [
   { id: 'superior', label: 'Superior', subtotalLabel: 'Subtotal Superior' },
 ]
 
-function DocentesSection({ docentesData,
+function DocentesSection({ ciclo, onCicloChange, docentesData,
   isActive,
   sectionRef,
   startingChartRef,
@@ -204,12 +204,18 @@ function DocentesSection({ docentesData,
         </p>
       </div>
 
-      <p>El desglose por nivel corresponde a la modalidad escolarizada. El total general incluye ambas modalidades.</p>
       {docentesData.meta.documento_url && (
         <p><a href={`${docentesData.meta.documento_url}#page=${docentesData.meta.pagina_pdf}`} target="_blank" rel="noreferrer">Fuente: Consolidado de inicio 2025-2026 (PDF)</a></p>
       )}
 
-      <div className="filter-group">
+      <div className="filter-group statistics-filters">
+        <div className="filter-field">
+          <label htmlFor="docentes-ciclo">Ciclo escolar</label>
+          <select id="docentes-ciclo" value={ciclo} onChange={event => onCicloChange(event.target.value)}>
+            <option value="2025-2026">2025-2026 (actual)</option>
+            <option value="2024-2025">2024-2025 (histórico)</option>
+          </select>
+        </div>
         <div className="filter-field">
           <label htmlFor="docentes-macroNivel">Macro nivel</label>
           <select id="docentes-macroNivel" value={macroNivel} onChange={(e) => setMacroNivel(e.target.value)}>

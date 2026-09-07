@@ -183,18 +183,6 @@ function App() {
       </nav>
 
       <main id="main-content" tabIndex={-1}>
-        {['docentes', 'estudiantes', 'escuelas'].includes(activeSection) && (
-        <div className="filter-group">
-          <div className="filter-field">
-            <label htmlFor="ciclo-escolar">Ciclo escolar de estadísticas</label>
-            <select id="ciclo-escolar" value={ciclo} onChange={(event) => setCiclo(event.target.value)}>
-              <option value="2025-2026">2025-2026 (actual)</option>
-              <option value="2024-2025">2024-2025 (histórico)</option>
-            </select>
-          </div>
-          <p>Consulta el ciclo actual o los datos históricos.</p>
-        </div>
-        )}
         <WelcomeDialog open={welcomeOpen} onClose={() => setWelcomeOpen(false)}>
           <div className="welcome-module" id="welcome-module">
             <p className="welcome-eyebrow">Información educativa · Estado de México</p>
@@ -257,6 +245,8 @@ function App() {
         </WelcomeDialog>
 
         <EstudiantesSection
+          ciclo={ciclo}
+          onCicloChange={setCiclo}
           key={`estudiantes-${ciclo}`}
           estudiantesData={estudiantesData}
           isActive={activeSection === 'estudiantes'}
@@ -264,6 +254,8 @@ function App() {
         />
 
         <DocentesSection
+          ciclo={ciclo}
+          onCicloChange={setCiclo}
           key={`docentes-${ciclo}`}
           docentesData={docentesData}
           isActive={activeSection === 'docentes'}
@@ -271,6 +263,8 @@ function App() {
         />
 
         <EscuelasSection
+          ciclo={ciclo}
+          onCicloChange={setCiclo}
           key={`escuelas-${ciclo}`}
           escuelasData={escuelasData}
           isActive={activeSection === 'escuelas'}
