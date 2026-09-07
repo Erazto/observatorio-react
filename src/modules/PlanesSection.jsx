@@ -23,7 +23,14 @@ function PlanesSection({ isActive, sectionRef }) {
     control === 'todos' ? 'todos' : control,
   )
 
-  const resumen = planesData.resumen_estatus
+  const planes = planesData.niveles.flatMap((n) => n.subniveles.flatMap((sub) => sub.planes))
+  const resumen = {
+    total_planes: planes.length,
+    vigentes: planes.filter((p) => p.estatus === 'vigente').length,
+    en_transicion: planes.filter((p) => p.estatus === 'en_transicion').length,
+    en_revision: planes.filter((p) => p.estatus === 'en_revision').length,
+  }
+  const alineacionPromedio = planes.length ? Math.round(planes.reduce((sum, p) => sum + p.alineacion_marco_legal, 0) / planes.length) : 0
   const estatusCatalogo = planesData.estatus_catalogo
 
   const formatNumber = (n) => n.toLocaleString('es-MX')
@@ -56,7 +63,7 @@ function PlanesSection({ isActive, sectionRef }) {
       <div className="metrics-header">
         <h2 id="planes-heading">4. Planes y Programas de Estudio</h2>
         <p>
-          Ciclo vigente: <strong>{planesData.meta.ciclo_vigente}</strong> | Última
+          Ciclo de referencia: <strong>{planesData.meta.ciclo_vigente}</strong> | Última
           actualización: <strong>{planesData.meta.ultima_actualizacion}</strong>
         </p>
         <p style={{ marginTop: 8, color: 'var(--gray)' }}>
@@ -107,11 +114,10 @@ function PlanesSection({ isActive, sectionRef }) {
           <div className="metric-icon superior" aria-hidden="true">
             <i className="fas fa-balance-scale"></i>
           </div>
-          <div className="metric-value">90%</div>
+          <div className="metric-value">{alineacionPromedio}%</div>
           <div className="metric-label">Alineación promedio al marco legal</div>
           <p style={{ marginTop: 12, color: 'var(--gray)', fontSize: '0.95rem' }}>
-            Estimación global de correspondencia con Constitución, Ley General de
-            Educación y normatividad estatal.
+            Promedio simple de los porcentajes registrados; pendiente de validación documental.
           </p>
         </div>
       </div>
@@ -127,7 +133,7 @@ function PlanesSection({ isActive, sectionRef }) {
       >
         <div>
           <label style={{ fontSize: '0.9rem', marginRight: 4 }}>Nivel educativo: </label>
-          <select value={macroNivel} onChange={(e) => setMacroNivel(e.target.value)}>
+          <select aria-label="Nivel educativo" value={macroNivel} onChange={(e) => setMacroNivel(e.target.value)}>
             <option value="todos">Todos</option>
             {planesData.niveles.map((n) => (
               <option key={n.id} value={n.id}>
@@ -139,9 +145,9 @@ function PlanesSection({ isActive, sectionRef }) {
 
         <div>
           <label style={{ fontSize: '0.9rem', marginRight: 4 }}>Subnivel: </label>
-          <select value={nivel} onChange={(e) => setNivel(e.target.value)}>
+          <select aria-label="Subnivel" value={nivel} onChange={(e) => setNivel(e.target.value)}>
             <option value="todos">Todos</option>
-            {planesData.niveles.flatMap((n) =>
+            {planesData.niveles.filter((n) => macroNivel === 'todos' || n.id === macroNivel).flatMap((n) =>
               n.subniveles.map((s) => (
                 <option key={`${n.id}-${s.id}`} value={s.id}>
                   {`${n.nombre} - ${s.nombre}`}
@@ -153,7 +159,7 @@ function PlanesSection({ isActive, sectionRef }) {
 
         <div>
           <label style={{ fontSize: '0.9rem', marginRight: 4 }}>Estatus: </label>
-          <select value={control} onChange={(e) => setControl(e.target.value)}>
+          <select aria-label="Estatus" value={control} onChange={(e) => setControl(e.target.value)}>
             <option value="todos">Todos</option>
             <option value="vigente">Vigente</option>
             <option value="en_transicion">En transición</option>
@@ -163,6 +169,7 @@ function PlanesSection({ isActive, sectionRef }) {
       </div>
 
       <div style={{ marginTop: 20 }}>
+        {!subnivelesConEstatus.some((n) => n.subniveles.some((sub) => sub.planes.length)) && <p role="status">No hay planes con los filtros seleccionados.</p>}
         {subnivelesConEstatus.map((nivelItem) => (
           <div key={nivelItem.id} style={{ marginBottom: 40 }}>
             <h3 className="chart-title" style={{ textAlign: 'left' }}>
@@ -315,7 +322,7 @@ function PlanesSection({ isActive, sectionRef }) {
                             </div>
                           </div>
 
-                          {plan.documento_oficial_url && (
+                          {plan.documento_oficial_url && plan.documento_oficial_url !== '#' && (
                             <div style={{ marginTop: 12 }}>
                               <a
                                 href={plan.documento_oficial_url}

@@ -1,0 +1,68 @@
+/* Sistema visual: superficies claras, lectura numérica y controles adaptables. */
+:root {
+  --light: #f4f6f9;
+  --dark: #1c293a;
+  --black: #1c293a;
+  --gray: #526174;
+  --shadow: 0 4px 20px rgb(25 42 64 / 5%);
+  --shadow-lg: 0 12px 32px rgb(25 42 64 / 9%);
+  --radius: 20px;
+  --transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+body { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+button, input, select { font: inherit; }
+button, select, input:not([type='checkbox']):not([type='file']) { min-height: 44px; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+header { padding: clamp(24px, 4vw, 48px) 20px; }
+header::before { animation: none; }
+header h1 { letter-spacing: -.035em; }
+header h2 { font-size: clamp(.875rem, 2vw, 1.1rem); }
+.main-nav { gap: 8px; padding: 12px; border-radius: 0; border-bottom: 1px solid #e2e8f0; box-shadow: none; }
+.nav-btn { min-width: 0; justify-content: center; padding: 11px 16px; border-radius: 12px; background: transparent; }
+.nav-btn .text { opacity: 1; transform: none; font-size: .875rem; font-weight: 600; }
+.nav-btn.active { box-shadow: 0 3px 10px rgb(159 34 65 / 15%); }
+main { max-width: 1440px; padding: clamp(16px, 3vw, 36px); margin-inline: auto; }
+.welcome-module { max-width: 1080px; margin: 16px auto; border: 1px solid #e2e8f0; background: #fff; }
+.welcome-module h3 { text-align: left; font-size: clamp(2.1rem, 5vw, 3.75rem); letter-spacing: -.045em; line-height: 1.08; max-width: 780px; margin-bottom: 24px; color: var(--primary-dark); }
+.welcome-module p { text-align: left; max-width: 76ch; line-height: 1.85; }
+.welcome-module .welcome-eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: .75rem; font-weight: 700; color: var(--primary); }
+.welcome-module .welcome-lead { font-size: clamp(1.1rem, 2vw, 1.35rem); color: var(--gray); }
+.welcome-actions { display: flex; flex-wrap: wrap; gap: 12px; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid #e2e8f0; }
+.metrics-header { text-align: left; margin-bottom: 24px; }
+.metrics-header h2 { letter-spacing: -.025em; }
+.filter-group { justify-content: flex-start; align-items: end; padding: 18px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; }
+.filter-group > p { font-size: .875rem; color: var(--gray); }
+.filter-field select, .mapa-input { border-color: #cbd5e1; border-radius: 10px; background: #fff; }
+.general-metrics { gap: 20px; }
+.metric-card { border: 1px solid #e2e8f0; box-shadow: var(--shadow); padding: clamp(20px, 3vw, 30px); }
+.metric-card:hover { transform: none; box-shadow: var(--shadow-lg); }
+.metric-value, .detail-value, .stats-table, .mapa-usage strong { font-variant-numeric: tabular-nums; }
+.metric-value { letter-spacing: -.045em; }
+.chart-container, .stats-table-container, .mapa-card { border: 1px solid #e2e8f0; box-shadow: var(--shadow); }
+.chart-title { letter-spacing: -.02em; }
+.stats-table-container { overflow-x: auto; overscroll-behavior-inline: contain; }
+.stats-table { width: 100%; font-size: .9rem; }
+.stats-table thead th { background: #f0f3f7; color: #334155; border-bottom: 2px solid #d6dfe9; }
+.stats-table td { border-bottom: 1px solid #edf1f5; }
+.stats-table tbody tr:hover { background: #f8f0f2; }
+.mapa-usage { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+.mapa-usage p { color: var(--gray); font-size: .875rem; margin-top: 8px; }
+.mapa-usage strong { color: var(--primary); }
+.mapa-color-controls { background: #f8fafc; }
+.mapa-legend { font-size: .8rem; }
+.mapa-legend i { border-radius: 4px; }
+@media (max-width: 680px) {
+  .main-nav { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; }
+  .nav-btn { flex: 0 0 auto; }
+  .nav-btn .text { white-space: nowrap; }
+  .filter-field { flex: 1 1 150px; min-width: 0; }
+  .filter-field select { width: 100%; }
+  .welcome-actions > button { width: 100%; }
+  .welcome-module { padding: 24px; }
+  .mapa-color-controls > label { width: 100%; }
+}
+@media print {
+  nav, footer, .filter-group, .welcome-actions, .mapa-card__actions { display: none !important; }
+  main { max-width: none; padding: 0; }
+  .metric-card, .chart-container { box-shadow: none; break-inside: avoid; }
+}

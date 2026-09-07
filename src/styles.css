@@ -1271,3 +1271,18 @@ footer {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(159, 34, 65, 0.15);
 }
+
+/* Navegación visible con teclado y preferencias de movimiento. */
+:focus-visible { outline: 3px solid #9f2241; outline-offset: 4px; }
+.sr-only:focus { position: fixed; top: 12px; left: 12px; width: auto; height: auto; margin: 0; padding: 12px; clip: auto; overflow: visible; background: white; color: #9f2241; z-index: 9999; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+.mapa-color-controls { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0; padding: 16px; border: 1px solid #d1d5db; border-radius: 12px; }
+.mapa-color-controls label { display: grid; gap: 8px; max-width: 100%; }
+.mapa-color-controls p { flex-basis: 100%; }
+.mapa-legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0; }
+.mapa-legend span { display: inline-flex; align-items: center; gap: 8px; }
+.mapa-legend i { display: inline-block; width: 20px; height: 20px; border: 1px solid #555; }
+.mapa-tooltip { white-space: pre-line; }

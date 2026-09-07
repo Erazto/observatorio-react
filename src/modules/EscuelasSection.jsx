@@ -127,7 +127,7 @@ function EscuelasSection({ escuelasData,
 
   useEffect(() => {
     const canvas = controlChartCanvasRef.current
-    if (!canvas || controlChartRef.current) return
+    if (!isActive || !canvas || controlChartRef.current) return
 
     controlChartRef.current = new Chart(canvas, {
       type: 'bar',
@@ -137,7 +137,8 @@ function EscuelasSection({ escuelasData,
           {
             data: CONTROL_KEYS.map((key) => macroSummaries.overall[key] || 0),
             backgroundColor: CONTROL_COLORS,
-            borderRadius: 12,
+            borderRadius: 6,
+            maxBarThickness: 72,
             barPercentage: 0.7,
           },
         ],
@@ -159,6 +160,7 @@ function EscuelasSection({ escuelasData,
         scales: {
           y: {
             beginAtZero: true,
+            grace: '12%',
             ticks: { callback: (v) => v.toLocaleString('es-MX') },
           },
         },
@@ -169,7 +171,7 @@ function EscuelasSection({ escuelasData,
       controlChartRef.current?.destroy()
       controlChartRef.current = null
     }
-  }, [])
+  }, [isActive])
 
   useEffect(() => {
     const chart = controlChartRef.current
@@ -204,8 +206,8 @@ function EscuelasSection({ escuelasData,
 
       <div className="filter-group">
         <div className="filter-field">
-          <label>Macro nivel</label>
-          <select value={macroNivel} onChange={(e) => setMacroNivel(e.target.value)}>
+          <label htmlFor="escuelas-macroNivel">Macro nivel</label>
+          <select id="escuelas-macroNivel" value={macroNivel} onChange={(e) => setMacroNivel(e.target.value)}>
             <option value="todos">Todos</option>
             <option value="basica">Básica</option>
             <option value="media_superior">Media Superior</option>
@@ -213,10 +215,10 @@ function EscuelasSection({ escuelasData,
           </select>
         </div>
         <div className="filter-field">
-          <label>Nivel</label>
-          <select value={nivel} onChange={(e) => setNivel(e.target.value)}>
+          <label htmlFor="escuelas-nivel">Nivel</label>
+          <select id="escuelas-nivel" value={nivel} onChange={(e) => setNivel(e.target.value)}>
             <option value="todos">Todos</option>
-            {escuelasData.niveles.map((n) => (
+            {escuelasData.niveles.filter((n) => macroNivel === 'todos' || n.macro_nivel === macroNivel).map((n) => (
               <option key={n.id} value={n.id}>
                 {n.nombre}
               </option>
@@ -224,8 +226,8 @@ function EscuelasSection({ escuelasData,
           </select>
         </div>
         <div className="filter-field">
-          <label>Control</label>
-          <select value={control} onChange={(e) => setControl(e.target.value)}>
+          <label htmlFor="escuelas-control">Control</label>
+          <select id="escuelas-control" value={control} onChange={(e) => setControl(e.target.value)}>
             <option value="todos">Todos</option>
             <option value="estatal">Estatal</option>
             <option value="federalizado">Federalizado</option>
@@ -371,6 +373,7 @@ function EscuelasSection({ escuelasData,
           <div className="chart-container">
             <div style={{ position: 'relative', height: 340 }}>
               <canvas
+                role="img"
                 ref={controlChartCanvasRef}
                 aria-label="Gráfico de distribución de escuelas por control administrativo"
                 style={{ width: '100%', height: '100%' }}
@@ -394,6 +397,7 @@ function EscuelasSection({ escuelasData,
             }}
           >
             <canvas
+                role="img"
               ref={pieChartCanvasRef}
               aria-label="Gráfico de distribución de escuelas públicas y privadas"
             ></canvas>

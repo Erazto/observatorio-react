@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import DocentesSection from './modules/DocentesSection'
 import EstudiantesSection from './modules/EstudiantesSection'
 import EscuelasSection from './modules/EscuelasSection'
 import PlanesSection from './modules/PlanesSection'
-import MapaInteractivoSection from './modules/MapaInteractivoSection'
+const MapaInteractivoSection = lazy(() => import('./modules/MapaInteractivoSection'))
 
 import docentesActual from './data/docentes.json'
 import docentesHistorico from './data/historico/2024-2025/docentes.json'
@@ -11,14 +11,11 @@ import estudiantesActual from './data/estudiantes.json'
 import estudiantesHistorico from './data/historico/2024-2025/estudiantes.json'
 import escuelasActual from './data/escuelas.json'
 import escuelasHistorico from './data/historico/2024-2025/escuelas.json'
-import seriesActual from './data/series_matricula_ems.json'
-import seriesHistorica from './data/historico/2024-2025/series_matricula_ems.json'
 
 import Chart from './utils/chart'
 
 function App() {
   const [ciclo, setCiclo] = useState('2025-2026')
-  const seriesEMS = ciclo === '2025-2026' ? seriesActual : seriesHistorica
   const docentesData = ciclo === '2025-2026' ? docentesActual : docentesHistorico
   const estudiantesData = ciclo === '2025-2026' ? estudiantesActual : estudiantesHistorico
   const escuelasData = ciclo === '2025-2026' ? escuelasActual : escuelasHistorico
@@ -30,21 +27,18 @@ function App() {
   const planesRef = useRef(null)
   const mapaRef = useRef(null)
 
-  const matriculaChartRef = useRef(null)
-  const startingChartRef = useRef(null)
-  const currentChartRef = useRef(null)
-  const gainChartRef = useRef(null)
   const pieEscuelasRef = useRef(null)
 
   const chartsRef = useRef({})
 
   // Inicializar y actualizar gráficos principales
   useEffect(() => {
+    if (activeSection !== 'escuelas') return
     const chartConfig = {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       animation: {
-        duration: 800,
+        duration: 300,
         easing: 'easeOutQuart',
       },
     }
@@ -66,39 +60,6 @@ function App() {
       }
     }
 
-    // Evolución matrícula EMS
-    if (matriculaChartRef.current) {
-      registerChart('matricula', matriculaChartRef.current, {
-        type: 'line',
-        data: {
-          labels: seriesEMS.series.map((p) => p.ciclo),
-          datasets: [
-            {
-              label: 'Matrícula EMS',
-              data: seriesEMS.series.map((p) => p.valor),
-              borderColor: '#9f2241',
-              backgroundColor: 'rgba(159, 34, 65, 0.1)',
-              fill: true,
-              tension: 0.4,
-              pointRadius: 5,
-              pointHoverRadius: 7,
-            },
-          ],
-        },
-        options: {
-          ...chartConfig,
-          plugins: {
-            title: {
-              display: true,
-              text: 'Evolución y Proyección de Matrícula - Media Superior',
-              color: '#9f2241',
-              font: { size: 16 },
-            },
-          },
-        },
-      })
-    }
-
     // Pastel escuelas públicas/privadas
     if (pieEscuelasRef.current) {
       registerChart('pieEscuelas', pieEscuelasRef.current, {
@@ -113,7 +74,7 @@ function App() {
               ],
               backgroundColor: ['#9f2241', '#c3b08f'],
               borderWidth: 3,
-              hoverOffset: 20,
+              hoverOffset: 8,
             },
           ],
         },
@@ -141,69 +102,13 @@ function App() {
       })
     }
 
-    // Mini-gráficos de conocimiento docente
-    const createMiniChart = (key, canvas, start, end, color) => {
-      if (!canvas) return
-      registerChart(key, canvas, {
-        type: 'line',
-        data: {
-          labels: ['', '', ''],
-          datasets: [
-            {
-              data: [start - 8, start - 3, end],
-              borderColor: color,
-              backgroundColor: `${color}25`,
-              fill: true,
-              tension: 0.4,
-              pointRadius: 0,
-              borderWidth: 3,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { x: { display: false }, y: { display: false } },
-        },
-      })
-    }
-
-    if (docentesData.conocimiento && startingChartRef.current) {
-      createMiniChart(
-        'startingChart',
-        startingChartRef.current,
-        docentesData.conocimiento.inicial,
-        docentesData.conocimiento.inicial,
-        '#60a5fa',
-      )
-    }
-    if (docentesData.conocimiento && currentChartRef.current) {
-      createMiniChart(
-        'currentChart',
-        currentChartRef.current,
-        docentesData.conocimiento.actual,
-        docentesData.conocimiento.actual,
-        '#3b82f6',
-      )
-    }
-    if (docentesData.conocimiento && gainChartRef.current) {
-      createMiniChart(
-        'gainChart',
-        gainChartRef.current,
-        0,
-        docentesData.conocimiento.mejora,
-        '#10b981',
-      )
-    }
-
     return () => {
       teardownKeys.forEach((key) => {
         chartsRef.current[key]?.destroy()
         delete chartsRef.current[key]
       })
     }
-  }, [ciclo])
+  }, [ciclo, activeSection])
 
   const handleNavClick = (sectionId) => {
     setActiveSection(sectionId)
@@ -223,6 +128,10 @@ function App() {
       </header>
 
       <nav aria-label="Navegación principal" className="main-nav">
+        <button className={`nav-btn ${activeSection === null ? 'active' : ''}`} onClick={() => handleNavClick(null)} aria-current={activeSection === null ? 'page' : undefined} type="button">
+          <i className="fas fa-home icon" aria-hidden="true"></i>
+          <span className="text">Inicio</span>
+        </button>
         <button
           className={`nav-btn ${activeSection === 'docentes' ? 'active' : ''}`}
           onClick={() => handleNavClick('docentes')}
@@ -274,7 +183,8 @@ function App() {
         </button>
       </nav>
 
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
+        {['docentes', 'estudiantes', 'escuelas'].includes(activeSection) && (
         <div className="filter-group">
           <div className="filter-field">
             <label htmlFor="ciclo-escolar">Ciclo escolar de estadísticas</label>
@@ -285,17 +195,24 @@ function App() {
           </div>
           <p>Aplica a estudiantes, docentes y escuelas. Planes y mapas indican sus propios periodos.</p>
         </div>
+        )}
         {!activeSection && (
           <div className="welcome-module" id="welcome-module">
-            <h3>Bienvenido al Observatorio Educativo</h3>
+            <p className="welcome-eyebrow">Información educativa · Estado de México</p>
+            <h3>Conoce la educación<br />desde sus datos</h3>
+            <p className="welcome-lead">Explora estudiantes, docentes, escuelas y mapas municipales en un mismo espacio.</p>
+            <div className="welcome-actions">
+              <button type="button" className="mapa-btn" onClick={() => handleNavClick('estudiantes')}>Explorar estadísticas <span aria-hidden="true">↗</span></button>
+              <button type="button" className="mapa-btn mapa-btn--outline" onClick={() => handleNavClick('mapa')}>Abrir mapa interactivo</button>
+            </div>
             <p>
               <strong>El Observatorio Educativo del Estado de México</strong> es una
-              iniciativa propuesta por la 
+              iniciativa propuesta por la{' '}
                 <strong>
                 Secretaría de Educación del Estado de México
                 (SECTI)
               </strong>
-              y desarrollada en el{' '}
+              {' '}y desarrollada en el{' '}
               <strong>
                 Instituto Superior de Ciencias de la Educación del Estado de México
                 (ISCEEM)
@@ -346,9 +263,6 @@ function App() {
           docentesData={docentesData}
           isActive={activeSection === 'docentes'}
           sectionRef={docentesRef}
-          startingChartRef={startingChartRef}
-          currentChartRef={currentChartRef}
-          gainChartRef={gainChartRef}
         />
 
         <EstudiantesSection
@@ -356,7 +270,6 @@ function App() {
           estudiantesData={estudiantesData}
           isActive={activeSection === 'estudiantes'}
           sectionRef={estudiantesRef}
-          matriculaChartCanvasRef={matriculaChartRef}
         />
 
         <EscuelasSection
@@ -373,10 +286,12 @@ function App() {
         />
 
         {/* NUEVA SECCIÓN: MAPA INTERACTIVO */}
+        {activeSection === 'mapa' && <Suspense fallback={<p role="status">Cargando mapa…</p>}>
         <MapaInteractivoSection
           isActive={activeSection === 'mapa'}
           sectionRef={mapaRef}
         />
+        </Suspense>}
       </main>
 
       <footer role="contentinfo">
@@ -387,7 +302,7 @@ function App() {
             Coordinación de Evaluación del Sistema Educativo Estatal
           </small>
           <div className="footer-links">
-            <a href="#acerca" aria-label="Acerca del observatorio">
+            <a href="#welcome-module" onClick={() => handleNavClick(null)} aria-label="Acerca del observatorio">
               Acerca de
             </a>
             <span style={{ margin: '0 10px', opacity: 0.7 }}>•</span>

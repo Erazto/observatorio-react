@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import { useFilters } from '../hooks/useFilters'
 import { filtrarNivelesEstudiantes } from '../utils/filterEstudiantes'
-import CoberturaEMS from "./CoberturaEMS";
+const CoberturaEMS = lazy(() => import("./CoberturaEMS"));
 import Chart from '../utils/chart'
 
 const CONTROL_KEYS = ['estatal', 'federalizado', 'federal', 'autonomo']
@@ -123,7 +123,7 @@ function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaCh
 
   useEffect(() => {
     const canvas = controlChartCanvasRef.current
-    if (!canvas || controlChartRef.current) return
+    if (!isActive || !canvas || controlChartRef.current) return
 
     controlChartRef.current = new Chart(canvas, {
       type: 'bar',
@@ -133,7 +133,8 @@ function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaCh
           {
             data: CONTROL_KEYS.map((key) => macroSummaries.overall[key] || 0),
             backgroundColor: CONTROL_COLORS,
-            borderRadius: 12,
+            borderRadius: 6,
+            maxBarThickness: 72,
             barPercentage: 0.7,
           },
         ],
@@ -155,6 +156,7 @@ function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaCh
         scales: {
           y: {
             beginAtZero: true,
+            grace: '12%',
             ticks: {
               callback: (v) => v.toLocaleString('es-MX'),
             },
@@ -167,7 +169,7 @@ function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaCh
       controlChartRef.current?.destroy()
       controlChartRef.current = null
     }
-  }, [])
+  }, [isActive])
 
   useEffect(() => {
     const chart = controlChartRef.current
@@ -202,8 +204,8 @@ function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaCh
 
       <div className="filter-group">
         <div className="filter-field">
-          <label>Macro nivel</label>
-          <select value={macroNivel} onChange={(e) => setMacroNivel(e.target.value)}>
+          <label htmlFor="estudiantes-macroNivel">Macro nivel</label>
+          <select id="estudiantes-macroNivel" value={macroNivel} onChange={(e) => setMacroNivel(e.target.value)}>
             <option value="todos">Todos</option>
             <option value="basica">Básica</option>
             <option value="media_superior">Media Superior</option>
@@ -211,10 +213,10 @@ function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaCh
           </select>
         </div>
         <div className="filter-field">
-          <label>Nivel</label>
-          <select value={nivel} onChange={(e) => setNivel(e.target.value)}>
+          <label htmlFor="estudiantes-nivel">Nivel</label>
+          <select id="estudiantes-nivel" value={nivel} onChange={(e) => setNivel(e.target.value)}>
             <option value="todos">Todos</option>
-            {estudiantesData.niveles.map((n) => (
+            {estudiantesData.niveles.filter((n) => macroNivel === 'todos' || n.macro_nivel === macroNivel).map((n) => (
               <option key={n.id} value={n.id}>
                 {n.nombre}
               </option>
@@ -222,8 +224,8 @@ function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaCh
           </select>
         </div>
         <div className="filter-field">
-          <label>Control</label>
-          <select value={control} onChange={(e) => setControl(e.target.value)}>
+          <label htmlFor="estudiantes-control">Control</label>
+          <select id="estudiantes-control" value={control} onChange={(e) => setControl(e.target.value)}>
             <option value="todos">Todos</option>
             <option value="estatal">Estatal</option>
             <option value="federalizado">Federalizado</option>
@@ -369,6 +371,7 @@ function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaCh
           <div className="chart-container">
             <div style={{ position: 'relative', height: 340 }}>
               <canvas
+                role="img"
                 ref={controlChartCanvasRef}
                 aria-label="Gráfico de distribución de estudiantes por control administrativo"
                 style={{ width: '100%', height: '100%' }}
@@ -511,7 +514,7 @@ function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaCh
           <p><a href={`${estudiantesData.meta.documento_url}#page=24`} target="_blank" rel="noreferrer">Consultar indicador oficial (PDF, página 24)</a></p>
           <p>Las series y proyecciones anteriores se pueden consultar seleccionando el ciclo histórico 2024-2025.</p>
         </div>
-      ) : <CoberturaEMS />}
+      ) : isActive ? <Suspense fallback={<p role="status">Cargando series históricas…</p>}><CoberturaEMS /></Suspense> : null}
 
     </section>
   )

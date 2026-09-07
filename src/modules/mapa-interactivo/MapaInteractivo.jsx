@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, useId } from "react";
-import * as XLSX from "xlsx";
+import { USAGE_KEY, EMPTY_USAGE, readUsage, incrementUsage } from "../../utils/mapUsage";
+import { PALETTES, NO_DATA_COLOR, buildScale } from "../../utils/mapColors";
 import mapSvgRaw from "./MapaMunicipios_2.svg?raw";
 
 /* ===========================
@@ -26,54 +27,30 @@ const formatNumber = (value) => {
   return new Intl.NumberFormat("es-MX").format(value);
 };
 
-/* Escala de color institucional */
-const COLOR_SCALE = [
-  "#f3f0eb",
-  "#e8e1d6",
-  "#ddd2c1",
-  "#d1c2ad",
-  "#c6b399",
-  "#bca486",
-  "#b19573",
-  "#a58761",
-  "#9a7850",
-  "#8e6a40",
-  "#7a3946",
-  "#9f2241",
-];
-
-
-function buildColorScale(values) {
-  const nums = values.filter((v) => v != null).slice().sort((a, b) => a - b);
-  if (!nums.length) return () => COLOR_SCALE[0];
-
-  // Si todos son iguales
-  if (nums[0] === nums[nums.length - 1]) return () => COLOR_SCALE.at(-1);
-
-  // Cuantiles: divide en N grupos con tamaños similares
-  const k = COLOR_SCALE.length; // 12
-  const thresholds = [];
-  for (let i = 1; i < k; i++) {
-    const p = i / k; // 1/k ... (k-1)/k
-    const idx = Math.floor(p * (nums.length - 1));
-    thresholds.push(nums[idx]);
-  }
-
-  return (v) => {
-    if (v == null) return COLOR_SCALE[0];
-    // encuentra el bucket según thresholds
-    let bucket = 0;
-    while (bucket < thresholds.length && v > thresholds[bucket]) bucket++;
-    return COLOR_SCALE[Math.min(bucket, COLOR_SCALE.length - 1)];
-  };
-}
-
-
 /* ===========================
    Componente
 =========================== */
 
 export default function MapaInteractivo() {
+  const [usage, setUsage] = useState(EMPTY_USAGE);
+  const [persistentUsage, setPersistentUsage] = useState(true);
+  const usageRef = useRef({ ...EMPTY_USAGE });
+  const countedVisit = useRef(false);
+  const countedView = useRef(null);
+  const recordUsage = (events) => {
+    let current = usageRef.current;
+    try { current = readUsage(window.localStorage); } catch { setPersistentUsage(false); }
+    const next = incrementUsage(current, events);
+    usageRef.current = next;
+    setUsage(next);
+    try { window.localStorage.setItem(USAGE_KEY, JSON.stringify(next)); }
+    catch { setPersistentUsage(false); }
+  };
+  useEffect(() => {
+    if (countedVisit.current) return;
+    countedVisit.current = true;
+    recordUsage(['visitas']);
+  }, []);
   const mapRef = useRef(null);
   const tooltipRef = useRef(null);
   const idPrefix = useId();
@@ -93,10 +70,16 @@ export default function MapaInteractivo() {
   const [colIndex, setColIndex] = useState({ cve: -1, nombre: -1 });
   const [selectedMetric, setSelectedMetric] = useState("");
 
-  const colorFn = useMemo(() => {
-    const vals = Object.values(dataMap).map((d) => d.valor);
-    return buildColorScale(vals);
-  }, [dataMap]);
+  const [palette, setPalette] = useState('institucional');
+  const [method, setMethod] = useState('quantiles');
+  const [cuts, setCuts] = useState('100; 500; 1000; 5000');
+  const [reverse, setReverse] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const scale = useMemo(() => buildScale(
+    Object.entries(dataMap).filter(([key, d]) => key === d.nombre).map(([, d]) => d.valor),
+    { palette, method, cuts, reverse },
+  ), [dataMap, palette, method, cuts, reverse]);
+  const colorFn = scale.color;
 
   const rankingData = useMemo(() => {
     const unique = Object.entries(dataMap)
@@ -134,7 +117,7 @@ export default function MapaInteractivo() {
   const showTooltip = (x, y, html) => {
     const t = tooltipRef.current;
     if (!t) return;
-    t.innerHTML = html;
+    t.textContent = html;
     t.style.display = "block";
     t.style.left = `${x + 12}px`;
     t.style.top = `${y + 12}px`;
@@ -187,14 +170,14 @@ export default function MapaInteractivo() {
           e.clientX,
           e.clientY,
           `
-          <strong>${d?.nombre ?? id}</strong><br/>
-          ${d?.cve ? `CVE: ${d.cve}<br/>` : ""}
-          <b>${d?.indicador ?? "Valor"}:</b> ${value ?? "Sin dato"}
+          ${d?.nombre ?? id}
+          ${d?.cve ? `CVE: ${d.cve}` : ""}
+          ${d?.indicador ?? "Valor"}: ${formatNumber(value)}
         `
         );
       };
       el.onmousemove = (e) =>
-        showTooltip(e.clientX, e.clientY, tooltipRef.current.innerHTML);
+        showTooltip(e.clientX, e.clientY, tooltipRef.current.textContent);
       el.onmouseleave = hideTooltip;
     });
   };
@@ -208,12 +191,15 @@ export default function MapaInteractivo() {
   =========================== */
 
   const handleExcel = async (file) => {
+    try {
+    setUploadError('');
+    const XLSX = await import('xlsx');
     const ab = await file.arrayBuffer();
     const wb = XLSX.read(ab, { type: "array" });
     const ws = wb.Sheets[wb.SheetNames[0]];
 
     const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-    if (!grid.length) return;
+    if (grid.length < 2) throw new Error("El archivo debe incluir encabezados y datos municipales.");
 
     const headerRaw = grid[0].map((h) => String(h ?? "").trim());
     const headerNorm = headerRaw.map((h) => normalize(h));
@@ -222,14 +208,19 @@ export default function MapaInteractivo() {
     const idxNom = headerNorm.indexOf(normalize("NOMBRE DEL MUNICIPIO"));
 
     if (idxNom < 0) {
-      alert("No se encontró la columna 'NOMBRE DEL MUNICIPIO'");
-      return;
+      throw new Error("No se encontró la columna NOMBRE DEL MUNICIPIO.");
     }
 
     const metricCols = headerRaw
       .map((name, idx) => ({ name, idx }))
       .filter((c) => c.idx !== idxCve && c.idx !== idxNom && c.name);
 
+    if (!metricCols.length || !grid.slice(1).some(row => String(row[idxNom] ?? '').trim() && metricCols.some(c => toNumber(row[c.idx]) !== null))) {
+      throw new Error('El archivo debe contener al menos un indicador numérico y un municipio.');
+    }
+    setRange({ min: '', max: '' });
+    setSearch('');
+    recordUsage(['cargas']);
     setSheetGrid(grid);
     setColIndex({ cve: idxCve, nombre: idxNom });
     setHeaders(metricCols);
@@ -240,6 +231,9 @@ export default function MapaInteractivo() {
       ) ?? metricCols[0];
 
     setSelectedMetric(preferred?.name || "");
+    } catch (error) {
+      setUploadError(error.message || 'No fue posible leer el Excel.');
+    }
   };
 
   /* ===========================
@@ -281,6 +275,10 @@ export default function MapaInteractivo() {
     });
 
     setDataMap(out);
+    if (values.length && (countedView.current?.grid !== sheetGrid || countedView.current?.metric !== selectedMetric)) {
+      countedView.current = { grid: sheetGrid, metric: selectedMetric };
+      recordUsage(['visualizaciones']);
+    }
   }, [sheetGrid, selectedMetric, colIndex]);
 
   /* ===========================
@@ -335,6 +333,12 @@ export default function MapaInteractivo() {
 
   return (
     <div className="mapa-interactivo">
+      <aside className="mapa-usage" aria-label="Uso del mapa en este navegador">
+        <h3>Actividad en este navegador</h3>
+        <p>Entradas a la sección: <strong>{usage.visitas}</strong> · Excel cargados: <strong>{usage.cargas}</strong> · Visualizaciones con datos: <strong>{usage.visualizaciones}</strong></p>
+        <p>Conteo local, no de visitantes únicos. Una visualización corresponde a cargar datos numéricos o cambiar de indicador. Cambiar colores y filtros no suma visualizaciones.</p>
+        {!persistentUsage && <p role="status">El navegador no permite guardar los contadores; solo se conservarán mientras esta sección permanezca abierta.</p>}
+      </aside>
       <div className="mapa-card">
         <div className="mapa-card__header">
           <div>
@@ -375,6 +379,7 @@ export default function MapaInteractivo() {
           </div>
         </div>
 
+        {uploadError && <p role="alert">{uploadError}</p>}
         <div className="mapa-filters-inline">
           {headers.length > 0 && (
             <div className="mapa-filter">
@@ -405,6 +410,32 @@ export default function MapaInteractivo() {
               type="search"
             />
           </div>
+        </div>
+
+        <fieldset className="mapa-color-controls">
+          <legend>Colores y clasificación del indicador</legend>
+          <label>Gama de colores
+            <select className="mapa-input" value={palette} onChange={e => setPalette(e.target.value)}>
+              {Object.entries(PALETTES).map(([key, p]) => <option key={key} value={key}>{p.label}</option>)}
+            </select>
+          </label>
+          <label>Método de clasificación
+            <select className="mapa-input" value={method} onChange={e => setMethod(e.target.value)}>
+              <option value="quantiles">Cuantiles (cantidad similar de municipios)</option>
+              <option value="equal">Intervalos de igual amplitud</option>
+              <option value="manual">Límites personalizados</option>
+            </select>
+          </label>
+          <label><input type="checkbox" checked={reverse} onChange={e => setReverse(e.target.checked)} /> Invertir gama</label>
+          {method === 'manual' && <label>Cuatro límites (ejemplo: 100; 500; 1000; 5000)
+            <input className="mapa-input" value={cuts} onChange={e => setCuts(e.target.value)} aria-invalid={!!scale.error} />
+          </label>}
+          {scale.error && <p role="alert">{scale.error}</p>}
+          <p>Los límites superiores se incluyen en cada intervalo. Los valores iguales reciben el mismo color. La escala usa todos los municipios cargados.</p>
+        </fieldset>
+        <div className="mapa-legend" aria-label={`Leyenda de ${selectedMetric || 'colores'}`}>
+          {scale.legend.map((item, i) => <span key={i}><i style={{ backgroundColor: item.color }} />{item.label}</span>)}
+          <span><i style={{ backgroundColor: NO_DATA_COLOR }} />{scale.error ? 'Clasificación pendiente' : 'Sin dato'}</span>
         </div>
 
         <div className="mapa-content">

@@ -1,10 +1,15 @@
 import { useState, useMemo } from 'react'
 
 export function useFilters(initial = {}) {
-  const [macroNivel, setMacroNivel] = useState('todos')
+  const [macroNivel, updateMacroNivel] = useState('todos')
   const [nivel, setNivel] = useState('todos')
   const [control, setControl] = useState('todos')
   const [ciclo] = useState(initial.ciclo || '2024-2025')
+
+  const setMacroNivel = (value) => {
+    updateMacroNivel(value)
+    setNivel('todos')
+  }
 
   const filters = useMemo(
     () => ({
