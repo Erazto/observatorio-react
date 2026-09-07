@@ -290,7 +290,11 @@ function App() {
             <h3>Bienvenido al Observatorio Educativo</h3>
             <p>
               <strong>El Observatorio Educativo del Estado de México</strong> es una
-              iniciativa propuesta por la Secretaría de Educación del Estado de México
+              iniciativa propuesta por la 
+                <strong>
+                Secretaría de Educación del Estado de México
+                (SECTI)
+              </strong>
               y desarrollada en el{' '}
               <strong>
                 Instituto Superior de Ciencias de la Educación del Estado de México
@@ -327,7 +331,7 @@ function App() {
               análisis temporal y territorial, reducir barreras técnicas y promover el
               uso informado de los datos.
             </p>
-            <p style={{ marginTop: 12, color: 'var(--gray)' }}>
+            <p style={{ marginTop: 12, color: 'var(--black)' }}>
               El Observatorio Educativo del Estado de México busca consolidarse como
               una <strong>herramienta estratégica</strong> para la{' '}
               <strong>evaluación, la planeación y la mejora continua</strong> del
