@@ -290,7 +290,8 @@ function App() {
             <h3>Bienvenido al Observatorio Educativo</h3>
             <p>
               <strong>El Observatorio Educativo del Estado de México</strong> es una
-              iniciativa desarrollada en el{' '}
+              iniciativa propuesta por la Secretaría de Educación del Estado de México
+              y desarrollada en el{' '}
               <strong>
                 Instituto Superior de Ciencias de la Educación del Estado de México
                 (ISCEEM)
