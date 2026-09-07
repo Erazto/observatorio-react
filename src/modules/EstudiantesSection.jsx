@@ -190,7 +190,7 @@ function EstudiantesSection({ estudiantesData, isActive, sectionRef, matriculaCh
       tabIndex={-1}
     >
       <div className="metrics-header">
-        <h2 id="estudiantes-heading">2. Estadísticas de Estudiantes (Matrícula)</h2>
+        <h2 id="estudiantes-heading">1. Estadísticas de Estudiantes (Matrícula)</h2>
         <p>
           Ciclo Escolar {estudiantesData.meta.ciclo} | Total General:{' '}
           <strong>{formatNumber(estudiantesData.meta.total_general)}</strong> alumnos

@@ -197,7 +197,7 @@ function DocentesSection({ docentesData,
       tabIndex={-1}
     >
       <div className="metrics-header">
-        <h2 id="docentes-heading">1. Estadísticas de Docentes</h2>
+        <h2 id="docentes-heading">2. Estadísticas de Docentes</h2>
         <p>
           Ciclo Escolar {docentesData.meta.ciclo} | Total General:{' '}
           <strong>{formatNumber(docentesData.meta.total_general)}</strong> docentes

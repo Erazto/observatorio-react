@@ -13,13 +13,15 @@ import escuelasActual from './data/escuelas.json'
 import escuelasHistorico from './data/historico/2024-2025/escuelas.json'
 
 import Chart from './utils/chart'
+import WelcomeDialog from './components/WelcomeDialog'
 
 function App() {
   const [ciclo, setCiclo] = useState('2025-2026')
   const docentesData = ciclo === '2025-2026' ? docentesActual : docentesHistorico
   const estudiantesData = ciclo === '2025-2026' ? estudiantesActual : estudiantesHistorico
   const escuelasData = ciclo === '2025-2026' ? escuelasActual : escuelasHistorico
-  const [activeSection, setActiveSection] = useState(null)
+  const [activeSection, setActiveSection] = useState('estudiantes')
+  const [welcomeOpen, setWelcomeOpen] = useState(true)
 
   const docentesRef = useRef(null)
   const estudiantesRef = useRef(null)
@@ -112,6 +114,7 @@ function App() {
 
   const handleNavClick = (sectionId) => {
     setActiveSection(sectionId)
+    setWelcomeOpen(false)
   }
 
   return (
@@ -128,20 +131,6 @@ function App() {
       </header>
 
       <nav aria-label="Navegación principal" className="main-nav">
-        <button className={`nav-btn ${activeSection === null ? 'active' : ''}`} onClick={() => handleNavClick(null)} aria-current={activeSection === null ? 'page' : undefined} type="button">
-          <i className="fas fa-home icon" aria-hidden="true"></i>
-          <span className="text">Inicio</span>
-        </button>
-        <button
-          className={`nav-btn ${activeSection === 'docentes' ? 'active' : ''}`}
-          onClick={() => handleNavClick('docentes')}
-          aria-expanded={activeSection === 'docentes'}
-          type="button"
-        >
-          <i className="fas fa-chalkboard-teacher icon" aria-hidden="true"></i>
-          <span className="text">Docentes</span>
-        </button>
-
         <button
           className={`nav-btn ${activeSection === 'estudiantes' ? 'active' : ''}`}
           onClick={() => handleNavClick('estudiantes')}
@@ -149,7 +138,17 @@ function App() {
           type="button"
         >
           <i className="fas fa-user-graduate icon" aria-hidden="true"></i>
-          <span className="text">Estudiantes</span>
+          <span className="text">1. Estudiantes</span>
+        </button>
+
+        <button
+          className={`nav-btn ${activeSection === 'docentes' ? 'active' : ''}`}
+          onClick={() => handleNavClick('docentes')}
+          aria-expanded={activeSection === 'docentes'}
+          type="button"
+        >
+          <i className="fas fa-chalkboard-teacher icon" aria-hidden="true"></i>
+          <span className="text">2. Docentes</span>
         </button>
 
         <button
@@ -159,7 +158,7 @@ function App() {
           type="button"
         >
           <i className="fas fa-school icon" aria-hidden="true"></i>
-          <span className="text">Escuelas</span>
+          <span className="text">3. Escuelas</span>
         </button>
 
         <button
@@ -169,7 +168,7 @@ function App() {
           type="button"
         >
           <i className="fas fa-book-open icon" aria-hidden="true"></i>
-          <span className="text">Planes y Programas</span>
+          <span className="text">4. Planes y Programas</span>
         </button>
 
         <button
@@ -193,13 +192,13 @@ function App() {
               <option value="2024-2025">2024-2025 (histórico)</option>
             </select>
           </div>
-          <p>Aplica a estudiantes, docentes y escuelas. Planes y mapas indican sus propios periodos.</p>
+          <p>Consulta el ciclo actual o los datos históricos.</p>
         </div>
         )}
-        {!activeSection && (
+        <WelcomeDialog open={welcomeOpen} onClose={() => setWelcomeOpen(false)}>
           <div className="welcome-module" id="welcome-module">
             <p className="welcome-eyebrow">Información educativa · Estado de México</p>
-            <h3>Conoce la educación<br />desde sus datos</h3>
+            <h3 id="welcome-title">Bienvenido al Observatorio Educativo</h3>
             <p className="welcome-lead">Explora estudiantes, docentes, escuelas y mapas municipales en un mismo espacio.</p>
             <div className="welcome-actions">
               <button type="button" className="mapa-btn" onClick={() => handleNavClick('estudiantes')}>Explorar estadísticas <span aria-hidden="true">↗</span></button>
@@ -216,8 +215,7 @@ function App() {
               <strong>
                 Instituto Superior de Ciencias de la Educación del Estado de México
                 (ISCEEM)
-              </strong>
-              , concebida como un espacio público, académico y técnico de referencia
+              </strong>, concebida como un espacio público, académico y técnico de referencia
               para la investigación, el análisis y la sistematización de información
               del Sistema Educativo Estatal.
             </p>
@@ -256,20 +254,20 @@ function App() {
               uso de la información y la evidencia al servicio de la educación.
             </p>
           </div>
-        )}
-
-        <DocentesSection
-          key={`docentes-${ciclo}`}
-          docentesData={docentesData}
-          isActive={activeSection === 'docentes'}
-          sectionRef={docentesRef}
-        />
+        </WelcomeDialog>
 
         <EstudiantesSection
           key={`estudiantes-${ciclo}`}
           estudiantesData={estudiantesData}
           isActive={activeSection === 'estudiantes'}
           sectionRef={estudiantesRef}
+        />
+
+        <DocentesSection
+          key={`docentes-${ciclo}`}
+          docentesData={docentesData}
+          isActive={activeSection === 'docentes'}
+          sectionRef={docentesRef}
         />
 
         <EscuelasSection
@@ -296,15 +294,13 @@ function App() {
 
       <footer role="contentinfo">
         <div className="footer-content">
-          <p>Observatorio Educativo del Estado de México © 2025</p>
-          <p>Desarrollo del ISCEEM 2025</p>
+          <p>Observatorio Educativo del Estado de México © 2026</p>
+          <p>Desarrollo del ISCEEM 2026</p>
           <small>
             Coordinación de Evaluación del Sistema Educativo Estatal
           </small>
           <div className="footer-links">
-            <a href="#welcome-module" onClick={() => handleNavClick(null)} aria-label="Acerca del observatorio">
-              Acerca de
-            </a>
+            <button type="button" className="footer-about" onClick={() => setWelcomeOpen(true)}>Acerca del observatorio</button>
             <span style={{ margin: '0 10px', opacity: 0.7 }}>•</span>
             <a href="#privacidad" aria-label="Política de privacidad">
               Privacidad
