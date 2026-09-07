@@ -204,9 +204,7 @@ function DocentesSection({ ciclo, onCicloChange, docentesData,
         </p>
       </div>
 
-      {docentesData.meta.documento_url && (
-        <p><a href={`${docentesData.meta.documento_url}#page=${docentesData.meta.pagina_pdf}`} target="_blank" rel="noreferrer">Fuente: Consolidado de inicio 2025-2026 (PDF)</a></p>
-      )}
+
 
       <div className="filter-group statistics-filters">
         <div className="filter-field">

@@ -1,30 +1,20 @@
 import React, { useEffect, useMemo, useRef, useState, useId } from "react";
 import { USAGE_KEY, EMPTY_USAGE, readUsage, incrementUsage } from "../../utils/mapUsage";
 import { PALETTES, NO_DATA_COLOR, buildScale } from "../../utils/mapColors";
+import { normalizeMunicipality, parseMapNumber, inspectMapGrid } from "../../utils/mapData";
 import mapSvgRaw from "./MapaMunicipios_2.svg?raw";
 
 /* ===========================
    Utilidades
 =========================== */
 
-const normalize = (s = "") =>
-  s
-    .toString()
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "_")
-    .toUpperCase();
-
-const toNumber = (v) => {
-  if (v === "" || v == null) return null;
-  const n = Number(String(v).replace(/,/g, ""));
-  return Number.isFinite(n) ? n : null;
-};
+const normalize = normalizeMunicipality;
+const toNumber = parseMapNumber;
+const numberFormatter = new Intl.NumberFormat('es-MX');
 
 const formatNumber = (value) => {
   if (value == null || Number.isNaN(value)) return "Sin dato";
-  return new Intl.NumberFormat("es-MX").format(value);
+  return numberFormatter.format(value);
 };
 
 /* ===========================
@@ -59,7 +49,11 @@ export default function MapaInteractivo() {
   const searchInputId = `${idPrefix}-search`;
 
   const [dataMap, setDataMap] = useState({});
-  const [rangeMeta, setRangeMeta] = useState({ min: null, max: null });
+  const [loading, setLoading] = useState(false);
+  const loadingRef = useRef(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+  const [fileName, setFileName] = useState('');
 
   const [search, setSearch] = useState("");
   const [range, setRange] = useState({ min: "", max: "" });
@@ -119,8 +113,8 @@ export default function MapaInteractivo() {
     if (!t) return;
     t.textContent = html;
     t.style.display = "block";
-    t.style.left = `${x + 12}px`;
-    t.style.top = `${y + 12}px`;
+    t.style.left = `${Math.max(8, Math.min(x + 12, window.innerWidth - t.offsetWidth - 8))}px`;
+    t.style.top = `${Math.max(8, Math.min(y + 12, window.innerHeight - t.offsetHeight - 8))}px`;
   };
 
   const hideTooltip = () => {
@@ -139,7 +133,7 @@ export default function MapaInteractivo() {
     const svg = root.querySelector("svg");
     if (!svg) return;
 
-    const paths = svg.querySelectorAll("[id]");
+    const paths = svg.querySelectorAll("path[id]");
 
     const q = normalize(search);
     const minF = range.min === "" ? null : Number(range.min);
@@ -179,6 +173,14 @@ export default function MapaInteractivo() {
       el.onmousemove = (e) =>
         showTooltip(e.clientX, e.clientY, tooltipRef.current.textContent);
       el.onmouseleave = hideTooltip;
+      el.setAttribute('tabindex', visible ? '0' : '-1');
+      el.setAttribute('role', 'img');
+      el.setAttribute('aria-label', `${d?.nombre ?? id.replace(/_/g, ' ')}: ${formatNumber(value)}`);
+      el.onfocus = () => {
+        const rect = el.getBoundingClientRect();
+        showTooltip(rect.left, rect.top, el.getAttribute('aria-label'));
+      };
+      el.onblur = hideTooltip;
     });
   };
 
@@ -191,6 +193,9 @@ export default function MapaInteractivo() {
   =========================== */
 
   const handleExcel = async (file) => {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+    setLoading(true);
     try {
     setUploadError('');
     const XLSX = await import('xlsx');
@@ -199,25 +204,8 @@ export default function MapaInteractivo() {
     const ws = wb.Sheets[wb.SheetNames[0]];
 
     const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-    if (grid.length < 2) throw new Error("El archivo debe incluir encabezados y datos municipales.");
-
-    const headerRaw = grid[0].map((h) => String(h ?? "").trim());
-    const headerNorm = headerRaw.map((h) => normalize(h));
-
-    const idxCve = headerNorm.indexOf(normalize("CVE_MUN"));
-    const idxNom = headerNorm.indexOf(normalize("NOMBRE DEL MUNICIPIO"));
-
-    if (idxNom < 0) {
-      throw new Error("No se encontró la columna NOMBRE DEL MUNICIPIO.");
-    }
-
-    const metricCols = headerRaw
-      .map((name, idx) => ({ name, idx }))
-      .filter((c) => c.idx !== idxCve && c.idx !== idxNom && c.name);
-
-    if (!metricCols.length || !grid.slice(1).some(row => String(row[idxNom] ?? '').trim() && metricCols.some(c => toNumber(row[c.idx]) !== null))) {
-      throw new Error('El archivo debe contener al menos un indicador numérico y un municipio.');
-    }
+    const { metrics: metricCols, nombre: idxNom, cve: idxCve } = inspectMapGrid(grid);
+    setFileName(file.name);
     setRange({ min: '', max: '' });
     setSearch('');
     recordUsage(['cargas']);
@@ -233,6 +221,9 @@ export default function MapaInteractivo() {
     setSelectedMetric(preferred?.name || "");
     } catch (error) {
       setUploadError(error.message || 'No fue posible leer el Excel.');
+    } finally {
+      loadingRef.current = false;
+      setLoading(false);
     }
   };
 
@@ -247,7 +238,7 @@ export default function MapaInteractivo() {
     const metricIdx = headerRaw.indexOf(selectedMetric);
     if (metricIdx < 0) return;
 
-    const out = {};
+    const out = Object.create(null);
     const values = [];
 
     for (let i = 1; i < sheetGrid.length; i++) {
@@ -269,11 +260,6 @@ export default function MapaInteractivo() {
       if (valor != null) values.push(valor);
     }
 
-    setRangeMeta({
-      min: values.length ? Math.min(...values) : null,
-      max: values.length ? Math.max(...values) : null,
-    });
-
     setDataMap(out);
     if (values.length && (countedView.current?.grid !== sheetGrid || countedView.current?.metric !== selectedMetric)) {
       countedView.current = { grid: sheetGrid, metric: selectedMetric };
@@ -286,6 +272,11 @@ export default function MapaInteractivo() {
   =========================== */
 
   const downloadPNG = async () => {
+    if (exporting) return;
+    setExporting(true);
+    setExportError('');
+    let url;
+    try {
     const svg = mapRef.current.querySelector("svg");
     if (!svg) return;
 
@@ -300,11 +291,13 @@ export default function MapaInteractivo() {
 
     const xml = new XMLSerializer().serializeToString(clonedSvg);
     const blob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
+    url = URL.createObjectURL(blob);
 
     const img = new Image();
-    await new Promise((res) => {
-      img.onload = res;
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { img.onload = null; img.onerror = null; reject(new Error('La exportación tardó demasiado. Inténtalo de nuevo.')); }, 15000);
+      img.onload = () => { clearTimeout(timer); resolve(); };
+      img.onerror = () => { clearTimeout(timer); reject(new Error('No fue posible generar la imagen del mapa.')); };
       img.src = url;
     });
 
@@ -319,12 +312,18 @@ export default function MapaInteractivo() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     ctx.drawImage(img, 0, 0);
-    URL.revokeObjectURL(url);
+
 
     const a = document.createElement("a");
     a.href = canvas.toDataURL("image/png");
     a.download = "mapa_interactivo_edomex.png";
     a.click();
+    } catch (error) {
+      setExportError(error.message || 'No fue posible exportar el mapa.');
+    } finally {
+      if (url) URL.revokeObjectURL(url);
+      setExporting(false);
+    }
   };
 
   /* ===========================
@@ -365,6 +364,7 @@ export default function MapaInteractivo() {
             <input
               id={uploadInputId}
               type="file"
+              disabled={loading}
               accept=".xlsx,.xls"
               className="sr-only"
               onChange={(e) => {
@@ -373,12 +373,15 @@ export default function MapaInteractivo() {
               }}
             />
 
-            <button className="mapa-btn" onClick={downloadPNG}>
-              Descargar mapa (PNG)
+            <button className="mapa-btn" onClick={downloadPNG} disabled={exporting || loading || !sheetGrid || !!scale.error}>
+              {exporting ? 'Generando PNG…' : 'Descargar mapa (PNG)'}
             </button>
           </div>
         </div>
 
+        {loading && <p role="status">Leyendo y validando Excel…</p>}
+        {fileName && <p>Archivo cargado: <strong>{fileName}</strong> · {headers.length} indicadores numéricos</p>}
+        {exportError && <p role="alert">{exportError}</p>}
         {uploadError && <p role="alert">{uploadError}</p>}
         <div className="mapa-filters-inline">
           {headers.length > 0 && (

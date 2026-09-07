@@ -197,9 +197,7 @@ function EstudiantesSection({ ciclo, onCicloChange, estudiantesData, isActive, s
         </p>
       </div>
 
-      {estudiantesData.meta.documento_url && (
-        <p><a href={`${estudiantesData.meta.documento_url}#page=${estudiantesData.meta.pagina_pdf}`} target="_blank" rel="noreferrer">Fuente: Consolidado de inicio 2025-2026 (PDF)</a></p>
-      )}
+
 
       <div className="filter-group statistics-filters">
         <div className="filter-field">
