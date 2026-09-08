@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, useId } from 'react';
 import { PALETTES, METHODS, NO_DATA_COLOR, buildScale, pearson, bivariateColor } from '../../utils/mapColors';
-import { normalizeMunicipality as normalize, parseMapNumber, inspectMapGrid, worksheetGrid } from '../../utils/mapData';
+import { normalizeMunicipality as normalize, parseMapNumber, readFirstMapSheet } from '../../utils/mapData';
 import { buildRankingBars } from '../../utils/rankingBars';
 import { exportMapPNG } from '../../utils/exportMap';
 import { USAGE_KEY, EMPTY_USAGE, readUsage, incrementUsage } from '../../utils/mapUsage';
@@ -24,13 +24,13 @@ export default function MapaInteractivo() {
     try{window.localStorage.setItem(USAGE_KEY,JSON.stringify(next));}catch{setPersistent(false);}
   };
   useEffect(()=>{if(!visited.current){visited.current=true;record(['visitas']);}},[]);
-  const [sheets,setSheets]=useState([]),[sheetIndex,setSheetIndex]=useState('0');
+  const [sheet,setSheet]=useState(null);
   const [fileName,setFileName]=useState(''),[loading,setLoading]=useState(false),[error,setError]=useState('');
   const [exporting,setExporting]=useState(false),[exportError,setExportError]=useState('');
   const [xId,setXId]=useState(''),[yId,setYId]=useState(''),[mode,setMode]=useState('');
   const [palette,setPalette]=useState('categoria1'),[method,setMethod]=useState('quantiles'),[reverse,setReverse]=useState(false);
   const [search,setSearch]=useState(''),[selected,setSelected]=useState([]);
-  const dataset=sheets[Number(sheetIndex)]?.data;
+  const dataset=sheet?.data;
   const metrics=dataset?.metrics||[];
   const x=metrics.find(m=>m.id===xId),y=metrics.find(m=>m.id===yId);
   const selectedSet=useMemo(()=>new Set(selected),[selected]);
@@ -60,9 +60,9 @@ export default function MapaInteractivo() {
   const countedView=useRef('');
   useEffect(()=>{
     if(!hasData)return;
-    const key=`${fileName}:${sheetIndex}:${xId}:${yId}:${mode}`;
+    const key=`${fileName}:${sheet?.name}:${xId}:${yId}:${mode}`;
     if(countedView.current!==key){countedView.current=key;record(['visualizaciones']);}
-  },[fileName,sheetIndex,xId,yId,mode,hasData]);
+  },[fileName,sheet,xId,yId,mode,hasData]);
 
   const hideTooltip=()=>{if(tooltipRef.current)tooltipRef.current.style.display='none';};
   useEffect(()=>{
@@ -80,21 +80,14 @@ export default function MapaInteractivo() {
     return ()=>{paths.forEach(el=>{el.onmouseenter=el.onmousemove=el.onmouseleave=el.onfocus=el.onblur=el.onclick=el.onkeydown=null;});hideTooltip();};
   },[dataMap,selectedSet,sx,sy,mode,x,y]);
 
-  const chooseSheet=index=>{
-    setSheetIndex(index);const data=sheets[Number(index)]?.data;
-    setXId(data?.metrics[0]?.id||'');setYId(data?.metrics[1]?.id||'');
-    setMode('');
-  };
   const upload=async file=>{
     if(busy.current)return;busy.current=true;setLoading(true);setError('');setExportError('');
     try{
       const XLSX=await import('xlsx');
       const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellNF:true});
-      const parsed=wb.SheetNames.map(name=>{try{return {name,data:inspectMapGrid(worksheetGrid(XLSX,wb.Sheets[name]))};}catch(e){return {name,error:e.message};}});
-      const first=parsed.findIndex(s=>s.data);
-      if(first<0)throw new Error(parsed.map(s=>`${s.name}: ${s.error}`).join(' '));
-      setSheets(parsed);setSheetIndex(String(first));setFileName(file.name);setSelected([]);setSearch('');
-      const cols=parsed[first].data.metrics;setXId(cols[0].id);setYId(cols[1]?.id||'');setMode('');countedView.current='';record(['cargas']);
+      const first=readFirstMapSheet(XLSX,wb);
+      setSheet(first);setFileName(file.name);setSelected([]);setSearch('');
+      const cols=first.data.metrics;setXId(cols[0].id);setYId(cols[1]?.id||'');setMode('');countedView.current='';record(['cargas']);
     }catch(e){setError(e.message||'No fue posible leer el archivo Excel.');}
     finally{busy.current=false;setLoading(false);}
   };
@@ -106,7 +99,7 @@ export default function MapaInteractivo() {
       legend.push({color:NO_DATA_COLOR,label:`Sin dato (${missingCount} municipios)`});
       await exportMapPNG(mapRef.current.querySelector('svg'),{selected,title,legend,notes:[
         `Método: ${METHODS[method]}. Región: ${selected.length?selected.map(id=>id.replace(/_/g,' ')).join(', '):'Estado de México'}.`,
-        `Archivo: ${fileName} · Hoja: ${sheets[Number(sheetIndex)].name}`,
+        `Archivo: ${fileName} · Hoja: ${sheet.name}`,
         ...(mode==='bivariate'?[`${correlationText} Pares válidos: ${correlation.n}. r × 100 no es porcentaje de causalidad.`]:[]),
       ]});
     }catch(e){setExportError(e.message);}finally{exportBusy.current=false;setExporting(false);}
@@ -114,18 +107,17 @@ export default function MapaInteractivo() {
 
   return <div className="mapa-interactivo">
     <div className="mapa-card">
-      <div className="mapa-card__header"><div><p className="mapa-card__eyebrow">Explorador geográfico</p><h3>Mapa interactivo municipal</h3><p>Construye tu mapa paso a paso. Cada elección actualiza la vista automáticamente.</p><p><strong>1. Carga tus datos</strong> · Excel con una fila por municipio y una o más columnas numéricas o porcentuales.</p></div>
+      <div className="mapa-card__header"><div><p className="mapa-card__eyebrow">Explorador geográfico</p><h3>Mapa interactivo municipal</h3><p>Construye tu mapa paso a paso. Cada elección actualiza la vista automáticamente.</p><p><strong>1. Carga tus datos</strong> · Excel con una fila por municipio y una o más columnas numéricas o porcentuales. Se utiliza únicamente la primera hoja del archivo.</p></div>
         <div className="mapa-card__actions"><a className="mapa-btn mapa-btn--ghost" href="/BD_municipios.xlsx" download>Plantilla Excel</a>
           <button type="button" className="mapa-btn mapa-btn--outline" disabled={loading} onClick={()=>fileInputRef.current?.click()}>{loading?'Leyendo Excel…':'Cargar Excel'}</button><input ref={fileInputRef} className="sr-only" aria-label="Cargar Excel" type="file" accept=".xlsx,.xls" disabled={loading} onChange={e=>{if(e.target.files?.[0])upload(e.target.files[0]);e.target.value='';}} />
           </div></div>
-      {error&&<p role="alert">{error}</p>}{exportError&&<p role="alert">{exportError}</p>}{loading&&<p role="status">Leyendo y validando las hojas del archivo…</p>}
+      {error&&<p role="alert">{error}</p>}{exportError&&<p role="alert">{exportError}</p>}{loading&&<p role="status">Leyendo y validando la primera hoja…</p>}
       {fileName&&<p>Archivo: <strong>{fileName}</strong> · {matched.length} municipios vinculados al mapa.</p>}
       {!!unmatched.length&&<details><summary>{unmatched.length} nombres no coinciden con el mapa (excluidos del análisis)</summary><p>{unmatched.map(r=>r.name).join(', ')}</p></details>}
       {!dataset&&<p className="mapa-flow-note">Empieza con «Cargar Excel». Si usas la plantilla, primero completa tus indicadores. Después podrás elegir el tipo de mapa.</p>}
       {dataset&&<section className="mapa-flow-step" aria-labelledby={`${uid}-analysis`}>
       <h4 id={`${uid}-analysis`}>2. Elige el tipo de mapa y sus columnas</h4>
       <div className="mapa-filters-inline">
-        {!!sheets.length&&<label>Hoja<select className="mapa-input" value={sheetIndex} onChange={e=>chooseSheet(e.target.value)}>{sheets.map((s,i)=><option key={i} value={i} disabled={!s.data}>{s.name}{!s.data?' · sin datos válidos':''}</option>)}</select></label>}
         <label>Tipo de mapa<select className="mapa-input" value={mode} onChange={e=>setMode(e.target.value)}>
           <option value="" disabled>Selecciona una opción</option>
           <option value="single">Mostrar una variable</option>
@@ -141,14 +133,7 @@ export default function MapaInteractivo() {
       {mode==='bivariate'&&<p>Selecciona dos columnas distintas. El mapa combinará sus valores y calculará qué tan relacionadas están en la región.</p>}
       </section>}
       {dataset&&mode&&<>
-      <fieldset className="mapa-region"><legend>3. Define la región (opcional)</legend>
-        <label htmlFor={`${uid}-search`}>Buscar y agregar municipios</label><input className="mapa-input" id={`${uid}-search`} type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Ej. Toluca" />
-        <p>{selected.length?`${selected.length} municipios seleccionados`:'Sin selección: se muestra todo el estado.'}</p>
-        <div className="mapa-region-actions"><button className="mapa-btn mapa-btn--outline" disabled={!candidates.length} onClick={()=>setSelected(previous=>[...new Set([...previous,...candidates.map(m=>m.id)])])}>Agregar resultados</button><button className="mapa-btn mapa-btn--ghost" onClick={()=>setSelected([])}>Mostrar todo el estado</button></div>
-        {!!selected.length&&<div className="mapa-selected">{selected.map(id=><button key={id} onClick={()=>toggle(id)} aria-label={`Quitar ${id.replace(/_/g,' ')}`}>{id.replace(/_/g,' ')} ×</button>)}</div>}
-        <div className="mapa-municipality-list">{candidates.map(m=><label key={m.id}><input type="checkbox" checked={selectedSet.has(m.id)} onChange={()=>toggle(m.id)} />{m.name}</label>)}{!candidates.length&&<p>No hay coincidencias.</p>}</div>
-      </fieldset>
-      <fieldset className="mapa-color-controls"><legend>4. Elige cómo agrupar los valores en colores</legend>
+      <fieldset className="mapa-color-controls"><legend>3. Elige cómo agrupar los valores en colores</legend>
         {mode==='single'&&<><label>Gama<select className="mapa-input" value={palette} onChange={e=>setPalette(e.target.value)}>{Object.entries(PALETTES).map(([id,p])=><option key={id} value={id}>{p.label}</option>)}</select></label><div className="mapa-invert-control">
           <button type="button" className="mapa-btn mapa-btn--outline" aria-pressed={reverse} onClick={()=>setReverse(value=>!value)}>
             <span aria-hidden="true">⇄</span> {reverse?'Restaurar colores':'Invertir colores'}
@@ -166,7 +151,7 @@ export default function MapaInteractivo() {
       <div className="mapa-legend">{sx.legend.map((l,i)=><span key={i}><i style={{backgroundColor:l.color}} />{mode==='bivariate'?`X${i+1}: `:''}{l.label} ({l.count})</span>)}<span><i style={{backgroundColor:NO_DATA_COLOR}} />Sin dato ({missingCount})</span></div>
       {mode==='bivariate'&&<div className="mapa-legend">{sy.legend.map((l,i)=><span key={i}>Y{i+1}: {l.label} ({l.count})</span>)}</div>}
       <div className="mapa-flow-step">
-        <h4>5. Revisa el mapa y exporta</h4>
+        <h4>4. Revisa el mapa y sus valores</h4>
         <p>{title} · {selected.length?`${selected.length} municipios seleccionados`:'Todo el estado'} · {METHODS[method]}</p>
         {!hasData&&<p role="status">No hay datos suficientes para pintar esta selección. Revisa las columnas o amplía la región.</p>}
         <button className="mapa-btn" disabled={!hasData||loading||exporting} onClick={exportPNG}>{exporting?'Generando PNG…':'Exportar región (PNG)'}</button>
@@ -175,7 +160,7 @@ export default function MapaInteractivo() {
       <div className="mapa-content" hidden={!dataset||!mode}><div className="mapa-map-panel">{!dataset&&<p>Carga un Excel con datos para colorear el mapa. Se admiten porcentajes de Excel y textos como 25%.</p>}<div ref={mapRef} className="mapa-svg-wrapper" dangerouslySetInnerHTML={SVG_HTML} /></div>
       <section className="mapa-ranking-panel"><h4>Máximos y mínimos · {x?.label||'Indicador'}</h4><p>Municipios de la región; colores del mapa{mode==='bivariate'?' bivariado':''}.</p>
         <p className="mapa-ranking-help">Las barras de ambas listas usan la misma escala, desde cero, para comparar los valores de la región.</p>
-        {[{title:'10 valores mayores',rows:ranked.slice(-10).reverse()},{title:'10 valores menores',rows:ranked.slice(0,10)}].map(group=>(
+        <div className="mapa-extremes-columns">{[{title:'10 valores mayores',rows:ranked.slice(-10).reverse()},{title:'10 valores menores',rows:ranked.slice(0,10)}].map(group=>(
           <div className="mapa-ranking" key={group.title}>
             <h5>{group.title}</h5>
             <ul>{group.rows.map(r=>{
@@ -191,7 +176,16 @@ export default function MapaInteractivo() {
               </li>;
             })}</ul>
           </div>
-        ))}{!ranked.length&&<p>No hay valores numéricos en la región seleccionada.</p>}</section></div>
+        ))}</div>{!ranked.length&&<p>No hay valores numéricos en la región seleccionada.</p>}</section>
+      <fieldset className="mapa-region"><legend>5. Elige municipios y define tu región (opcional)</legend>
+        <label htmlFor={`${uid}-search`}>Buscar y agregar municipios</label><input className="mapa-input" id={`${uid}-search`} type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Ej. Toluca" />
+        <p>{selected.length?`${selected.length} municipios seleccionados`:'Sin selección: se muestra todo el estado.'}</p>
+        <div className="mapa-region-actions"><button className="mapa-btn mapa-btn--outline" disabled={!candidates.length} onClick={()=>setSelected(previous=>[...new Set([...previous,...candidates.map(m=>m.id)])])}>Agregar resultados</button><button className="mapa-btn mapa-btn--ghost" onClick={()=>setSelected([])}>Mostrar todo el estado</button></div>
+        {!!selected.length&&<div className="mapa-selected">{selected.map(id=><button key={id} onClick={()=>toggle(id)} aria-label={`Quitar ${id.replace(/_/g,' ')}`}>{id.replace(/_/g,' ')} ×</button>)}</div>}
+        <div className="mapa-municipality-list">{candidates.map(m=><label key={m.id}><input type="checkbox" checked={selectedSet.has(m.id)} onChange={()=>toggle(m.id)} />{m.name}</label>)}{!candidates.length&&<p>No hay coincidencias.</p>}</div>
+      </fieldset>
+      <button className="mapa-btn" disabled={!hasData||loading||exporting} onClick={exportPNG}>{exporting?'Generando PNG…':'Exportar región (PNG)'}</button>
+      </div>
     </div>
     <details className="mapa-usage"><summary>Actividad local de esta herramienta</summary><p>Entradas: {usage.visitas} · Excel cargados: {usage.cargas} · Visualizaciones: {usage.visualizaciones}</p><p>Contadores de este navegador; cambiar región o colores no suma una visualización.</p>{!persistent&&<p>No se pueden guardar los contadores.</p>}</details>
     <div ref={tooltipRef} className="mapa-tooltip" />

@@ -2,7 +2,7 @@
 
 ## Operación
 
-- Cargar `.xlsx` o `.xls`. Se busca una hoja válida; las hojas válidas pueden seleccionarse después. Los encabezados pueden estar precedidos por títulos y se aceptan `Municipio`, `Nombre municipio` y `Nombre del municipio`.
+- Cargar `.xlsx` o `.xls`. Se utiliza únicamente la primera hoja, sin selector. Si no es válida, se muestra el error sin buscar datos en las demás hojas. Los encabezados pueden estar precedidos por títulos y se aceptan `Municipio`, `Nombre municipio` y `Nombre del municipio`.
 - Los indicadores se identifican por columna; encabezados repetidos se diferencian con su número de columna. Municipios repetidos requieren corrección para evitar una agregación arbitraria.
 - Se admiten porcentajes nativos de Excel y textos como `25%` o `12,5%`. Se calculan en puntos porcentuales y se muestran con `%`. Una columna que mezcla porcentajes con números sin unidad se rechaza para evitar interpretar 0.25 indistintamente como 0.25 o 25%.
 - Buscar y marcar municipios, agregarlos desde los resultados o seleccionarlos directamente en el mapa. Una selección vacía representa todo el estado. La búsqueda solo filtra la lista y no borra la región.
@@ -36,3 +36,11 @@ Prueba de navegador realizada sobre la compilación de producción en Chrome: ca
 Se verificó en Chrome la compilación de producción a 1440 px y 390 px: los controles de análisis no aparecen antes de cargar el Excel, se requiere elegir tipo de mapa, la segunda columna solo aparece en bivariado y la exportación se habilita con datos. Se probaron la inversión, las barras proporcionales, selección regional, PNG recortado con crédito y carga posterior de porcentajes. No se detectaron excepciones JavaScript ni desbordamiento horizontal de página a 390 px. Capturas inspeccionadas en escritorio y móvil. Esta comprobación no sustituye pruebas de usabilidad con personas ni una matriz completa de navegadores.
 
 Los contadores locales permanecen en un apartado desplegable. La leyenda muestra el número de municipios sin dato; la interfaz limpia guiones bajos de los nombres y muestra una vista de los tonos actuales junto al botón de invertir colores. Las barras usan el mismo origen cero y escala en ambas listas.
+
+## Distribución del mapa y carga simplificada
+
+La primera hoja es la única fuente de datos del archivo. Se conservan la validación y el formato porcentual; el nombre de la hoja sigue incluido en la referencia del PNG.
+
+El flujo muestra carga, tipo de mapa/columnas y clasificación; después el mapa a ancho completo, máximos a la izquierda y mínimos a la derecha, y finalmente la selección de municipios para formar una región. En pantallas de hasta 640 px las listas se apilan para mantener la lectura. Se conservan las barras y colores, con botones de exportación antes del mapa y después de la selección.
+
+Validado con pruebas de primera hoja válida/inválida, compilación y Chrome a 1440 y 390 px: orden vertical, dos columnas en escritorio, una en móvil, sin desbordamiento horizontal y conservación de selección/inversión al navegar.

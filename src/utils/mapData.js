@@ -40,3 +40,14 @@ export function worksheetGrid(XLSX,sheet) {
   }));
   return grid;
 }
+
+// No se buscan hojas alternativas: el usuario prepara sus datos en la primera.
+export function readFirstMapSheet(XLSX, workbook) {
+  const name = workbook.SheetNames[0];
+  if (!name) throw new Error('El archivo no contiene hojas.');
+  try {
+    return { name, data: inspectMapGrid(worksheetGrid(XLSX, workbook.Sheets[name])) };
+  } catch (error) {
+    throw new Error(`Revisa la primera hoja del Excel (${name}): ${error.message}`);
+  }
+}

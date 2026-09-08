@@ -116,3 +116,17 @@ main { max-width: 1440px; padding: clamp(16px, 3vw, 36px); margin-inline: auto; 
 .mapa-axis-note { font-size: .85rem; color: var(--gray); margin-top: 12px; }
 .mapa-card > p, .mapa-flow-step p { overflow-wrap: anywhere; }
 .mapa-btn:disabled:hover { transform: none; box-shadow: none; }
+
+/* Mapa completo, comparativa debajo y selección regional al final. */
+.mapa-interactivo .mapa-content { display: flex; flex-direction: column; }
+.mapa-interactivo .mapa-content[hidden] { display: none; }
+.mapa-interactivo .mapa-content > * { min-height: 0; min-width: 0; }
+.mapa-interactivo .mapa-map-panel { flex: none; }
+.mapa-interactivo .mapa-svg-wrapper svg { display: block; max-height: 680px; }
+.mapa-extremes-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.mapa-extremes-columns ul { list-style: none; margin: 0; padding: 0; }
+.mapa-extremes-columns h5 { font-size: 1rem; margin: 0; }
+.mapa-extremes-columns .mapa-rank-item { font-size: .9rem; gap: 6px 8px; padding: 6px 0; }
+@media (max-width: 640px) {
+  .mapa-extremes-columns { grid-template-columns: 1fr; gap: 20px; }
+}

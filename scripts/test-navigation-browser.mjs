@@ -64,6 +64,20 @@ try {
   await wait('document.body.textContent.includes("Archivo:") && !document.body.textContent.includes("Leyendo y validando")')
   await run(`var el=[...document.querySelectorAll('label')].find(l=>l.textContent.startsWith('Tipo de mapa')).querySelector('select');el.value='single';el.dispatchEvent(new Event('change',{bubbles:true}))`)
   await wait('document.querySelectorAll(".mapa-rank-fill").length>0')
+  assert.equal(await run(`[...document.querySelectorAll('.mapa-filters-inline label')].some(l=>l.textContent.startsWith('Hoja'))`), false)
+  await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false })
+  await wait(`getComputedStyle(document.querySelector('.mapa-extremes-columns')).gridTemplateColumns.split(' ').length===2`)
+  assert.equal(await run(`(() => {
+    const box=s=>document.querySelector(s).getBoundingClientRect();
+    const map=box('.mapa-map-panel'), rank=box('.mapa-ranking-panel'), region=box('.mapa-region');
+    const groups=[...document.querySelectorAll('.mapa-extremes-columns > div')].map(e=>e.getBoundingClientRect());
+    return rank.top>=map.bottom && region.top>=rank.bottom && Math.abs(groups[0].top-groups[1].top)<1 && groups[1].left>groups[0].right;
+  })()`), true)
+  await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true })
+  await wait(`getComputedStyle(document.querySelector('.mapa-extremes-columns')).gridTemplateColumns.split(' ').length===1`)
+  assert.equal(await run('document.documentElement.scrollWidth<=innerWidth'), true)
+  await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false })
+
   await run(`document.querySelector('.mapa-invert-control button').click();[...document.querySelectorAll('.mapa-municipality-list label')].find(l=>l.textContent==='Toluca').querySelector('input').click()`)
   await wait('document.querySelectorAll(".mapa-selected button").length===1')
   await run(`window.__savedMap=document.querySelector('.mapa-svg-wrapper svg')`)
