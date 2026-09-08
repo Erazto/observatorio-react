@@ -79,3 +79,16 @@ main { max-width: 1440px; padding: clamp(16px, 3vw, 36px); margin-inline: auto; 
 .statistics-filters { display: grid; grid-template-columns: minmax(220px, 1.25fr) repeat(3, minmax(160px, 1fr)); align-items: end; gap: 16px; overflow-x: auto; }
 .statistics-filters .filter-field { min-width: 0; }
 .statistics-filters .filter-field select { width: 100%; }
+
+.mapa-region { border: 1px solid #d1d5db; border-radius: 12px; padding: 16px; margin-block: 16px; }
+.mapa-region-actions, .mapa-selected { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 12px; }
+.mapa-selected button { padding: 6px 12px; border: 1px solid #9f2241; background: #fff; color: #9f2241; border-radius: 20px; cursor: pointer; }
+.mapa-municipality-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 8px; max-height: 200px; overflow: auto; }
+.mapa-municipality-list label { display:flex; align-items:center; gap:8px; min-height:36px; }
+.mapa-bivariate-matrix { display:grid; grid-template-columns:repeat(5,36px); gap:2px; margin:16px; }
+.mapa-bivariate-matrix span { width:36px; height:36px; border:1px solid #666; }
+.mapa-rank-item { display:grid; grid-template-columns:20px minmax(0,1fr) auto; gap:8px; align-items:center; padding:8px 0; }
+.mapa-rank-swatch { width:20px; height:20px; border:1px solid #666; border-radius:4px; }
+
+
+.mapa-filters-inline > label { display: grid; gap: 8px; min-width: 0; flex: 1 1 180px; }
