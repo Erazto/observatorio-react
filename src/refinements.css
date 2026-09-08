@@ -92,3 +92,27 @@ main { max-width: 1440px; padding: clamp(16px, 3vw, 36px); margin-inline: auto; 
 
 
 .mapa-filters-inline > label { display: grid; gap: 8px; min-width: 0; flex: 1 1 180px; }
+
+.mapa-flow-step { margin-block: 24px; }
+.mapa-flow-step h4 { margin-bottom: 12px; }
+.mapa-flow-step p, .mapa-flow-note { margin-block: 12px; color: var(--gray); }
+.mapa-content[hidden] { display: none; }
+.mapa-region legend, .mapa-color-controls legend { font-weight: 700; }
+
+.mapa-rank-track { grid-column: 1 / -1; position: relative; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; }
+.mapa-rank-fill { position: absolute; top: 0; bottom: 0; border-radius: 6px; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 15%); transition: width .2s ease, left .2s ease, background-color .2s ease; }
+.mapa-rank-zero { position: absolute; top: 0; bottom: 0; width: 1px; background: #64748b; }
+.mapa-ranking-help { font-size: .85rem; color: var(--gray); }
+
+.mapa-invert-control { display: grid; align-content: end; gap: 6px; }
+.mapa-invert-control small { color: var(--gray); }
+.mapa-invert-control button[aria-pressed="true"] { background: var(--primary); color: #fff; }
+
+/* Ajustes de legibilidad comprobados a 390 y 1440 px. */
+.mapa-invert-control button { gap: 8px; }
+.mapa-palette-preview { display: flex; width: 150px; height: 14px; border: 1px solid #94a3b8; border-radius: 5px; overflow: hidden; }
+.mapa-palette-preview span { flex: 1; }
+.mapa-rank-item > span:nth-child(2) { overflow-wrap: anywhere; }
+.mapa-axis-note { font-size: .85rem; color: var(--gray); margin-top: 12px; }
+.mapa-card > p, .mapa-flow-step p { overflow-wrap: anywhere; }
+.mapa-btn:disabled:hover { transform: none; box-shadow: none; }

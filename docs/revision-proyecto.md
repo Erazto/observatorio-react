@@ -45,3 +45,12 @@ Revisión de código, datos JSON, entradas de la aplicación, estilos, mapas, co
 - Renderizado estático de React: inicio sin selector, botón Inicio presente, mapa diferido, planes sin enlaces `#` y periodo de referencia visible.
 - Revisión aritmética de totales históricos y comparación de series locales.
 - No se verificaron interacciones, dimensiones de gráficos ni apariencia móvil en un navegador real.
+
+### Navegación y conservación del estado — 8 de septiembre de 2026
+
+- La URL identifica la sección mediante `#estudiantes`, `#docentes`, `#escuelas`, `#planes` o `#mapa`. Se admiten entrada directa, recarga y Atrás/Adelante; otras anclas no cambian la sección activa. La bienvenida aparece al entrar sin fragmento y puede reabrirse desde el pie.
+- El mapa se carga al visitarlo por primera vez y permanece montado al navegar. Conserva el Excel y la configuración durante esa página abierta. No persiste el archivo tras recargar o cerrar la pestaña.
+- El menú identifica la sección actual con `aria-current="page"`.
+- Los filtros se reinician juntos al cambiar el ciclo recibido por el hook, incluidas las secciones ocultas. Ya no dependen de claves que desmonten las secciones.
+- Validación: `node scripts/test-map.mjs`, `npm run build` y `node scripts/test-navigation-browser.mjs`. La prueba de navegador requiere la compilación servida con `npm run preview` en 4173 y Chrome de pruebas con `--remote-debugging-port=9223` y un perfil temporal separado. Comprueba los dos ciclos, filtros dependientes, navegación, recarga, accesibilidad del menú y conservación de Excel, región e inversión. No se detectaron excepciones de JavaScript en ese recorrido.
+- Pendiente para otra etapa: consolidar CSS y optimizar el SVG geográfico. La compilación conserva la advertencia por el tamaño del mapa. El contador global sigue pospuesto.

@@ -14,14 +14,20 @@ import escuelasHistorico from './data/historico/2024-2025/escuelas.json'
 
 import Chart from './utils/chart'
 import WelcomeDialog from './components/WelcomeDialog'
+import { useSectionNavigation } from './hooks/useSectionNavigation'
 
 function App() {
   const [ciclo, setCiclo] = useState('2025-2026')
   const docentesData = ciclo === '2025-2026' ? docentesActual : docentesHistorico
   const estudiantesData = ciclo === '2025-2026' ? estudiantesActual : estudiantesHistorico
   const escuelasData = ciclo === '2025-2026' ? escuelasActual : escuelasHistorico
-  const [activeSection, setActiveSection] = useState('estudiantes')
-  const [welcomeOpen, setWelcomeOpen] = useState(true)
+  const [activeSection, navigate] = useSectionNavigation()
+  const [mapVisited, setMapVisited] = useState(activeSection === 'mapa')
+  const [welcomeOpen, setWelcomeOpen] = useState(() => !window.location.hash)
+
+  useEffect(() => {
+    if (activeSection === 'mapa') setMapVisited(true)
+  }, [activeSection])
 
   const docentesRef = useRef(null)
   const estudiantesRef = useRef(null)
@@ -113,7 +119,7 @@ function App() {
   }, [ciclo, activeSection])
 
   const handleNavClick = (sectionId) => {
-    setActiveSection(sectionId)
+    navigate(sectionId)
     setWelcomeOpen(false)
   }
 
@@ -134,7 +140,7 @@ function App() {
         <button
           className={`nav-btn ${activeSection === 'estudiantes' ? 'active' : ''}`}
           onClick={() => handleNavClick('estudiantes')}
-          aria-expanded={activeSection === 'estudiantes'}
+          aria-current={activeSection === 'estudiantes' ? 'page' : undefined}
           type="button"
         >
           <i className="fas fa-user-graduate icon" aria-hidden="true"></i>
@@ -144,7 +150,7 @@ function App() {
         <button
           className={`nav-btn ${activeSection === 'docentes' ? 'active' : ''}`}
           onClick={() => handleNavClick('docentes')}
-          aria-expanded={activeSection === 'docentes'}
+          aria-current={activeSection === 'docentes' ? 'page' : undefined}
           type="button"
         >
           <i className="fas fa-chalkboard-teacher icon" aria-hidden="true"></i>
@@ -154,7 +160,7 @@ function App() {
         <button
           className={`nav-btn ${activeSection === 'escuelas' ? 'active' : ''}`}
           onClick={() => handleNavClick('escuelas')}
-          aria-expanded={activeSection === 'escuelas'}
+          aria-current={activeSection === 'escuelas' ? 'page' : undefined}
           type="button"
         >
           <i className="fas fa-school icon" aria-hidden="true"></i>
@@ -164,7 +170,7 @@ function App() {
         <button
           className={`nav-btn ${activeSection === 'planes' ? 'active' : ''}`}
           onClick={() => handleNavClick('planes')}
-          aria-expanded={activeSection === 'planes'}
+          aria-current={activeSection === 'planes' ? 'page' : undefined}
           type="button"
         >
           <i className="fas fa-book-open icon" aria-hidden="true"></i>
@@ -174,7 +180,7 @@ function App() {
         <button
           className={`nav-btn ${activeSection === 'mapa' ? 'active' : ''}`}
           onClick={() => handleNavClick('mapa')}
-          aria-expanded={activeSection === 'mapa'}
+          aria-current={activeSection === 'mapa' ? 'page' : undefined}
           type="button"
         >
           <i className="fas fa-map-marked-alt icon" aria-hidden="true"></i>
@@ -247,7 +253,6 @@ function App() {
         <EstudiantesSection
           ciclo={ciclo}
           onCicloChange={setCiclo}
-          key={`estudiantes-${ciclo}`}
           estudiantesData={estudiantesData}
           isActive={activeSection === 'estudiantes'}
           sectionRef={estudiantesRef}
@@ -256,7 +261,6 @@ function App() {
         <DocentesSection
           ciclo={ciclo}
           onCicloChange={setCiclo}
-          key={`docentes-${ciclo}`}
           docentesData={docentesData}
           isActive={activeSection === 'docentes'}
           sectionRef={docentesRef}
@@ -265,7 +269,6 @@ function App() {
         <EscuelasSection
           ciclo={ciclo}
           onCicloChange={setCiclo}
-          key={`escuelas-${ciclo}`}
           escuelasData={escuelasData}
           isActive={activeSection === 'escuelas'}
           sectionRef={escuelasRef}
@@ -278,7 +281,7 @@ function App() {
         />
 
         {/* NUEVA SECCIÓN: MAPA INTERACTIVO */}
-        {activeSection === 'mapa' && <Suspense fallback={<p role="status">Cargando mapa…</p>}>
+        {(mapVisited || activeSection === 'mapa') && <Suspense fallback={activeSection === 'mapa' ? <p role="status">Cargando mapa…</p> : null}>
         <MapaInteractivoSection
           isActive={activeSection === 'mapa'}
           sectionRef={mapaRef}

@@ -1,10 +1,11 @@
 export const PALETTES = {
-  categoria1: { label: 'Categoría 1 · Verdes', colors: ['#EDF7F0', '#CDE9D6', '#61BA7D', '#245232', '#16321F'] },
-  institucional: { label: 'Institucional', colors: ['#f3e8df', '#ddbc9b', '#bb876e', '#a54c55', '#9f2241'] },
-  azules: { label: 'Azules', colors: ['#eff3ff', '#bdd7e7', '#6baed6', '#3182bd', '#08519c'] },
-  viridis: { label: 'Violeta a amarillo', colors: ['#440154', '#3b528b', '#21918c', '#5ec962', '#fde725'] },
+  categoria1: { label: 'Verde', colors: ['#EDF7F0', '#CDE9D6', '#61BA7D', '#245232', '#16321F'] },
+  azules: { label: 'Azul', colors: ['#EFF6FF', '#BFDBFE', '#60A5FA', '#2563EB', '#1E3A8A'] },
+  lilas: { label: 'Lilas', colors: ['#F5F0FA', '#DDD0ED', '#B49ACF', '#805BA6', '#48256B'] },
+  aqua: { label: 'Aqua', colors: ['#ECFDFB', '#B5EAE3', '#58C4B8', '#218579', '#125249'] },
+  institucional: { label: 'Institucional · Guinda', colors: ['#FAEFF2', '#EAC5CF', '#CE8399', '#9F2241', '#56212F'] },
 };
-export const NO_DATA_COLOR = '#d1d5db';
+export const NO_DATA_COLOR = '#D1D5DB';
 export const METHODS = { quantiles: 'Cuantiles', equal: 'Intervalos iguales', dalenius: 'Dalenius–Hodges' };
 export function classBreaks(values, method = 'quantiles') {
   const nums = values.filter(Number.isFinite).sort((a,b) => a-b);

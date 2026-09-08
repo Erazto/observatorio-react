@@ -1,502 +1,343 @@
-import React, { useEffect, useMemo, useRef, useState, useId } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
-import mapSvgRaw from "./MapaMunicipios_2.svg?raw";
 
-/* ===========================
-   Utilidades
-=========================== */
+/**
+ * MapaMatriculaMS
+ * - Lee un XLSX desde /public/data
+ * - Permite elegir ciclo escolar
+ * - Pinta un SVG de municipios con cuantiles (choropleth)
+ *
+ * Requisitos:
+ * - El SVG debe tener paths con id o data-attr que podamos empatar.
+ *   Este componente intenta empatar por:
+ *   1) data-cve="15001" (recomendado)
+ *   2) id="15001" o id que contenga 15001
+ *   3) data-name="Toluca" (fallback por nombre normalizado)
+ */
 
-const normalize = (s = "") =>
-  s
-    .toString()
+function normName(s) {
+  return String(s ?? "")
+    .toLowerCase()
     .trim()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "_")
-    .toUpperCase();
-
-const toNumber = (v) => {
-  if (v === "" || v == null) return null;
-  const n = Number(String(v).replace(/,/g, ""));
-  return Number.isFinite(n) ? n : null;
-};
-
-const formatNumber = (value) => {
-  if (value == null || Number.isNaN(value)) return "Sin dato";
-  return new Intl.NumberFormat("es-MX").format(value);
-};
-
-/* Escala de color institucional */
-const COLOR_SCALE = [
-  "#f3f0eb",
-  "#e8e1d6",
-  "#ddd2c1",
-  "#d1c2ad",
-  "#c6b399",
-  "#bca486",
-  "#b19573",
-  "#a58761",
-  "#9a7850",
-  "#8e6a40",
-  "#7a3946",
-  "#9f2241",
-];
-
-
-function buildColorScale(values) {
-  const nums = values.filter((v) => v != null).slice().sort((a, b) => a - b);
-  if (!nums.length) return () => COLOR_SCALE[0];
-
-  // Si todos son iguales
-  if (nums[0] === nums[nums.length - 1]) return () => COLOR_SCALE.at(-1);
-
-  // Cuantiles: divide en N grupos con tamaños similares
-  const k = COLOR_SCALE.length; // 12
-  const thresholds = [];
-  for (let i = 1; i < k; i++) {
-    const p = i / k; // 1/k ... (k-1)/k
-    const idx = Math.floor(p * (nums.length - 1));
-    thresholds.push(nums[idx]);
-  }
-
-  return (v) => {
-    if (v == null) return COLOR_SCALE[0];
-    // encuentra el bucket según thresholds
-    let bucket = 0;
-    while (bucket < thresholds.length && v > thresholds[bucket]) bucket++;
-    return COLOR_SCALE[Math.min(bucket, COLOR_SCALE.length - 1)];
-  };
+    .replace(/[\u0300-\u036f]/g, "") // quita acentos
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ");
 }
 
+function pickYearColumns(columns) {
+  // columnas tipo: "Matrícula\n2019-2020"
+  return columns
+    .filter((c) => /matr[ií]cula/i.test(c) && /\d{4}-\d{4}/.test(c))
+    .map((c) => ({
+      key: c,
+      label: c.replace(/\s+/g, " ").replace("\n", " "),
+      // extrae 2019-2020
+      cycle: (c.match(/\d{4}-\d{4}/) || [c])[0],
+    }));
+}
 
-/* ===========================
-   Componente
-=========================== */
+function quantileBins(values, k = 7) {
+  const v = values.filter((x) => Number.isFinite(x)).sort((a, b) => a - b);
+  if (v.length === 0) return [];
+  const bins = [];
+  for (let i = 1; i < k; i++) {
+    const idx = Math.floor((i / k) * (v.length - 1));
+    bins.push(v[idx]);
+  }
+  return bins; // k-1 cortes
+}
 
-export default function MapaInteractivo() {
-  const mapRef = useRef(null);
-  const tooltipRef = useRef(null);
-  const idPrefix = useId();
-  const uploadInputId = `${idPrefix}-upload`;
-  const metricSelectId = `${idPrefix}-metric`;
-  const searchInputId = `${idPrefix}-search`;
+function getBinIndex(x, cuts) {
+  // devuelve 0..cuts.length
+  let i = 0;
+  while (i < cuts.length && x > cuts[i]) i++;
+  return i;
+}
 
-  const [dataMap, setDataMap] = useState({});
-  const [rangeMeta, setRangeMeta] = useState({ min: null, max: null });
+export default function MapaMatriculaMS({
+  svgUrl = "/src/modules/mapa-interactivo/MapaMunicipios_2.svg", // si importas el svg distinto, cámbialo
+  xlsxUrl = "/data/BD_municipios_matricula_MS.xlsx",
+  height = 520,
+}) {
+  const [rows, setRows] = useState([]);
+  const [yearKey, setYearKey] = useState("");
+  const [svgText, setSvgText] = useState("");
+  const [hover, setHover] = useState(null);
 
-  const [search, setSearch] = useState("");
-  const [range, setRange] = useState({ min: "", max: "" });
+  // 1) cargar XLSX
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const res = await fetch(xlsxUrl);
+      const buf = await res.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(ws, { defval: null });
+      if (!mounted) return;
+      setRows(json);
 
-  // NUEVO: Excel dinámico
-  const [sheetGrid, setSheetGrid] = useState(null);
-  const [headers, setHeaders] = useState([]);
-  const [colIndex, setColIndex] = useState({ cve: -1, nombre: -1 });
-  const [selectedMetric, setSelectedMetric] = useState("");
+      // elegir primer ciclo por defecto (último si existe)
+      const cols = json.length ? Object.keys(json[0]) : [];
+      const years = pickYearColumns(cols);
+      const last = years[years.length - 1];
+      setYearKey(last?.key || years[0]?.key || "");
+    })().catch((e) => {
+      console.error("Error leyendo XLSX:", e);
+      setRows([]);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [xlsxUrl]);
 
-  const colorFn = useMemo(() => {
-    const vals = Object.values(dataMap).map((d) => d.valor);
-    return buildColorScale(vals);
-  }, [dataMap]);
+  // 2) cargar SVG como texto (para poder inyectar estilos/handlers)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      // OJO: si tu build no permite leer desde /src, muévelo a /public y usa /mapa.svg
+      const res = await fetch(svgUrl);
+      const text = await res.text();
+      if (!mounted) return;
+      setSvgText(text);
+    })().catch((e) => {
+      console.error("Error cargando SVG:", e);
+      setSvgText("");
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [svgUrl]);
 
-  const rankingData = useMemo(() => {
-    const unique = Object.entries(dataMap)
-      .filter(([key, value]) => value && key === value.nombre)
-      .map(([, value]) => value)
-      .filter((item) => typeof item.valor === "number");
+  const yearOptions = useMemo(() => {
+    if (!rows.length) return [];
+    const cols = Object.keys(rows[0] || {});
+    return pickYearColumns(cols);
+  }, [rows]);
 
-    if (!unique.length) {
-      return { top: [], bottom: [], max: null, min: null };
+  // índice por CVE y por nombre normalizado (fallback)
+  const index = useMemo(() => {
+    const byCve = new Map();
+    const byName = new Map();
+
+    for (const r of rows) {
+      const cve = String(r["CVE_MUN"] ?? "").trim();
+      const name = normName(r["NOMBRE DEL MUNICIPIO"] ?? r["NOMBRE_MUN"] ?? r["MUNICIPIO"]);
+      if (cve) byCve.set(cve, r);
+      if (name) byName.set(name, r);
+    }
+    return { byCve, byName };
+  }, [rows]);
+
+  const valuesForYear = useMemo(() => {
+    if (!yearKey) return [];
+    return rows
+      .map((r) => {
+        const v = Number(r[yearKey]);
+        return Number.isFinite(v) ? v : null;
+      })
+      .filter((v) => v !== null);
+  }, [rows, yearKey]);
+
+  const cuts = useMemo(() => quantileBins(valuesForYear, 7), [valuesForYear]);
+
+  // paleta neutra (ajústala a tu institucional si quieres)
+  const fills = useMemo(
+    () => ["#efe7dc", "#e2d2bf", "#d5bfa4", "#c7ab88", "#b7956c", "#a67f52", "#8f673d", "#6f4f2f"],
+    []
+  );
+
+  const svgWithColors = useMemo(() => {
+    if (!svgText) return "";
+
+    // Insertamos un <style> y marcamos paths interactivos.
+    // Buscamos paths/polygons dentro del SVG.
+    // Luego los “pintamos” usando match por CVE (recomendado).
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgText, "image/svg+xml");
+    const svg = doc.documentElement;
+
+    // estilo base
+    const style = doc.createElementNS("http://www.w3.org/2000/svg", "style");
+    style.textContent = `
+      .mun { cursor: pointer; transition: opacity .12s ease; }
+      .mun:hover { opacity: .9; }
+      .mun-stroke { stroke: rgba(0,0,0,.25); stroke-width: .6; }
+    `;
+    svg.insertBefore(style, svg.firstChild);
+
+    const shapes = svg.querySelectorAll("path, polygon");
+    shapes.forEach((el) => {
+      // Intento de match:
+      const dataCve = el.getAttribute("data-cve");
+      const id = el.getAttribute("id") || "";
+      const dataName = el.getAttribute("data-name");
+
+      let row = null;
+
+      // 1) data-cve exacto (ideal)
+      if (dataCve && index.byCve.has(String(dataCve))) {
+        row = index.byCve.get(String(dataCve));
+      }
+
+      // 2) id contiene CVE
+      if (!row) {
+        const m = id.match(/15\d{3}/); // EdoMex: 15001..15125
+        if (m?.[0] && index.byCve.has(m[0])) row = index.byCve.get(m[0]);
+      }
+
+      // 3) por nombre
+      if (!row && dataName) {
+        const key = normName(dataName);
+        if (index.byName.has(key)) row = index.byName.get(key);
+      }
+
+      const v = row && yearKey ? Number(row[yearKey]) : NaN;
+      const ok = Number.isFinite(v);
+
+      let fill = "#f2f2f2"; // sin dato
+      if (ok) {
+        const bi = getBinIndex(v, cuts);
+        fill = fills[Math.min(bi, fills.length - 1)];
+      }
+
+      el.setAttribute("fill", fill);
+      el.classList.add("mun", "mun-stroke");
+    });
+
+    return new XMLSerializer().serializeToString(svg);
+  }, [svgText, index, yearKey, cuts, fills]);
+
+  // Handler hover: usamos event delegation leyendo atributos del target
+  function onMouseMove(e) {
+    const t = e.target;
+    if (!(t instanceof SVGElement)) return;
+
+    const dataCve = t.getAttribute("data-cve");
+    const id = t.getAttribute("id") || "";
+    const dataName = t.getAttribute("data-name");
+
+    let row = null;
+    if (dataCve && index.byCve.has(String(dataCve))) row = index.byCve.get(String(dataCve));
+    if (!row) {
+      const m = id.match(/15\d{3}/);
+      if (m?.[0] && index.byCve.has(m[0])) row = index.byCve.get(m[0]);
+    }
+    if (!row && dataName) {
+      const key = normName(dataName);
+      if (index.byName.has(key)) row = index.byName.get(key);
     }
 
-    const sortedAsc = unique.slice().sort((a, b) => a.valor - b.valor);
-    const bottom = sortedAsc.slice(0, Math.min(10, sortedAsc.length));
-    const top = sortedAsc.slice(-10).reverse();
-    const max = sortedAsc.at(-1)?.valor ?? null;
-    const min = sortedAsc[0]?.valor ?? null;
-
-    const topRange = {
-      min: top.length ? top[top.length - 1].valor : null,
-      max: top.length ? top[0].valor : null,
-    };
-
-    const bottomRange = {
-      min: bottom.length ? bottom[0].valor : null,
-      max: bottom.length ? bottom[bottom.length - 1].valor : null,
-    };
-
-    return { top, bottom, max, min, topRange, bottomRange };
-  }, [dataMap]);
-
-  /* ===========================
-     Tooltip
-  =========================== */
-
-  const showTooltip = (x, y, html) => {
-    const t = tooltipRef.current;
-    if (!t) return;
-    t.innerHTML = html;
-    t.style.display = "block";
-    t.style.left = `${x + 12}px`;
-    t.style.top = `${y + 12}px`;
-  };
-
-  const hideTooltip = () => {
-    const t = tooltipRef.current;
-    if (t) t.style.display = "none";
-  };
-
-  /* ===========================
-     Pintar SVG
-  =========================== */
-
-  const applyMapStyles = () => {
-    const root = mapRef.current;
-    if (!root) return;
-
-    const svg = root.querySelector("svg");
-    if (!svg) return;
-
-    const paths = svg.querySelectorAll("[id]");
-
-    const q = normalize(search);
-    const minF = range.min === "" ? null : Number(range.min);
-    const maxF = range.max === "" ? null : Number(range.max);
-
-    paths.forEach((el) => {
-      const id = el.id;
-      const key = dataMap[id] ? id : normalize(id);
-      const d = dataMap[key];
-
-      const value = d?.valor ?? null;
-      const matchesSearch =
-        !q ||
-        (d?.nombre ? normalize(d.nombre).includes(q) : normalize(id).includes(q));
-      const visible =
-        matchesSearch &&
-        (minF == null || (value != null && value >= minF)) &&
-        (maxF == null || (value != null && value <= maxF));
-
-      el.style.fill = colorFn(value);
-      el.style.opacity = visible ? "1" : "0.18";
-      el.style.stroke = "#0b0f14";
-      el.style.strokeWidth = "0.7";
-      el.style.cursor = "pointer";
-
-      el.onmouseenter = (e) => {
-        showTooltip(
-          e.clientX,
-          e.clientY,
-          `
-          <strong>${d?.nombre ?? id}</strong><br/>
-          ${d?.cve ? `CVE: ${d.cve}<br/>` : ""}
-          <b>${d?.indicador ?? "Valor"}:</b> ${value ?? "Sin dato"}
-        `
-        );
-      };
-      el.onmousemove = (e) =>
-        showTooltip(e.clientX, e.clientY, tooltipRef.current.innerHTML);
-      el.onmouseleave = hideTooltip;
-    });
-  };
-
-  useEffect(() => {
-    applyMapStyles();
-  }, [dataMap, search, range, colorFn]);
-
-  /* ===========================
-     Cargar Excel (DINÁMICO)
-  =========================== */
-
-  const handleExcel = async (file) => {
-    const ab = await file.arrayBuffer();
-    const wb = XLSX.read(ab, { type: "array" });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-
-    const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-    if (!grid.length) return;
-
-    const headerRaw = grid[0].map((h) => String(h ?? "").trim());
-    const headerNorm = headerRaw.map((h) => normalize(h));
-
-    const idxCve = headerNorm.indexOf(normalize("CVE_MUN"));
-    const idxNom = headerNorm.indexOf(normalize("NOMBRE DEL MUNICIPIO"));
-
-    if (idxNom < 0) {
-      alert("No se encontró la columna 'NOMBRE DEL MUNICIPIO'");
+    if (!row) {
+      setHover(null);
       return;
     }
 
-    const metricCols = headerRaw
-      .map((name, idx) => ({ name, idx }))
-      .filter((c) => c.idx !== idxCve && c.idx !== idxNom && c.name);
-
-    setSheetGrid(grid);
-    setColIndex({ cve: idxCve, nombre: idxNom });
-    setHeaders(metricCols);
-
-    const preferred =
-      metricCols.find((c) =>
-        normalize(c.name).includes(normalize("MATRICULA"))
-      ) ?? metricCols[0];
-
-    setSelectedMetric(preferred?.name || "");
-  };
-
-  /* ===========================
-     Reconstruir mapa al cambiar indicador
-  =========================== */
-
-  useEffect(() => {
-    if (!sheetGrid || !selectedMetric) return;
-
-    const headerRaw = sheetGrid[0].map((h) => String(h ?? "").trim());
-    const metricIdx = headerRaw.indexOf(selectedMetric);
-    if (metricIdx < 0) return;
-
-    const out = {};
-    const values = [];
-
-    for (let i = 1; i < sheetGrid.length; i++) {
-      const r = sheetGrid[i];
-      const nombre = String(r[colIndex.nombre] ?? "").trim();
-      if (!nombre) continue;
-
-      const cve = colIndex.cve >= 0 ? String(r[colIndex.cve] ?? "").trim() : "";
-      const valor = toNumber(r[metricIdx]);
-
-      out[nombre] = {
-        nombre,
-        cve,
-        valor,
-        indicador: selectedMetric,
-      };
-      out[normalize(nombre)] = out[nombre];
-
-      if (valor != null) values.push(valor);
-    }
-
-    setRangeMeta({
-      min: values.length ? Math.min(...values) : null,
-      max: values.length ? Math.max(...values) : null,
+    const v = yearKey ? row[yearKey] : null;
+    setHover({
+      cve: row["CVE_MUN"],
+      municipio: row["NOMBRE DEL MUNICIPIO"],
+      value: v,
+      x: e.clientX,
+      y: e.clientY,
     });
+  }
 
-    setDataMap(out);
-  }, [sheetGrid, selectedMetric, colIndex]);
-
-  /* ===========================
-     Descargar PNG
-  =========================== */
-
-  const downloadPNG = async () => {
-    const svg = mapRef.current.querySelector("svg");
-    if (!svg) return;
-
-    const clonedSvg = svg.cloneNode(true);
-    const viewBox = svg.viewBox?.baseVal;
-    const width = viewBox?.width || svg.getBoundingClientRect().width || 800;
-    const height = viewBox?.height || svg.getBoundingClientRect().height || 600;
-
-    clonedSvg.setAttribute("width", width);
-    clonedSvg.setAttribute("height", height);
-    clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-
-    const xml = new XMLSerializer().serializeToString(clonedSvg);
-    const blob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-
-    const img = new Image();
-    await new Promise((res) => {
-      img.onload = res;
-      img.src = url;
-    });
-
-    const scale = 3;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = width * scale;
-    canvas.height = height * scale;
-
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.setTransform(scale, 0, 0, scale, 0, 0);
-    ctx.drawImage(img, 0, 0);
-    URL.revokeObjectURL(url);
-
-    const a = document.createElement("a");
-    a.href = canvas.toDataURL("image/png");
-    a.download = "mapa_interactivo_edomex.png";
-    a.click();
-  };
-
-  /* ===========================
-     Render
-  =========================== */
+  function onMouseLeave() {
+    setHover(null);
+  }
 
   return (
-    <div className="mapa-interactivo">
-      <div className="mapa-card">
-        <div className="mapa-card__header">
-          <div>
-            <p className="mapa-card__eyebrow">Explorador geográfico</p>
-            <h3>Mapa interactivo municipal</h3>
-            <p className="mapa-card__subtitle">
-              Visualiza los indicadores municipales y aplica filtros para destacar la información relevante.
-            </p>
-          </div>
+    <section style={{ marginTop: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <h3 style={{ margin: 0 }}>Mapa – Matrícula EMS por municipio</h3>
 
-          <div className="mapa-card__actions">
-            <a
-              href="/BD_municipios.xlsx"
-              target="_blank"
-              rel="noreferrer"
-              className="mapa-btn mapa-btn--ghost"
-            >
-              Descargar plantilla Excel
-            </a>
-
-            <label htmlFor={uploadInputId} className="mapa-btn mapa-btn--outline">
-              Cargar datos (.xlsx)
-            </label>
-            <input
-              id={uploadInputId}
-              type="file"
-              accept=".xlsx,.xls"
-              className="sr-only"
-              onChange={(e) => {
-                if (e.target.files?.[0]) handleExcel(e.target.files[0]);
-                e.target.value = "";
-              }}
-            />
-
-            <button className="mapa-btn" onClick={downloadPNG}>
-              Descargar mapa (PNG)
-            </button>
-          </div>
-        </div>
-
-        <div className="mapa-filters-inline">
-          {headers.length > 0 && (
-            <div className="mapa-filter">
-              <label htmlFor={metricSelectId}>Indicador</label>
-              <select
-                id={metricSelectId}
-                className="mapa-input"
-                value={selectedMetric}
-                onChange={(e) => setSelectedMetric(e.target.value)}
-              >
-                {headers.map((h) => (
-                  <option key={h.idx} value={h.name}>
-                    {h.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div className="mapa-filter">
-            <label htmlFor={searchInputId}>Buscar municipio</label>
-            <input
-              id={searchInputId}
-              className="mapa-input"
-              placeholder="Ej. Toluca"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              type="search"
-            />
-          </div>
-        </div>
-
-        <div className="mapa-content">
-          <div className={`mapa-map-panel ${!sheetGrid ? "mapa-map-panel--empty" : ""}`}>
-            {!sheetGrid && (
-              <div className="mapa-placeholder">
-                <h5>Carga la base de datos para iniciar</h5>
-                <p>
-                  Descarga la plantilla, integra tus datos y vuelve a cargarla para activar el mapa.
-                </p>
-              </div>
-            )}
-
-            <div
-              ref={mapRef}
-              className="mapa-svg-wrapper"
-              dangerouslySetInnerHTML={{ __html: mapSvgRaw }}
-            />
-          </div>
-
-          <section className="mapa-ranking-panel">
-            <div className="mapa-ranking">
-              <h4>Ranking municipal</h4>
-              {rankingData.top.length ? (
-                <div className="mapa-ranking-columns">
-                  <div className="mapa-ranking__group">
-                    <h5>Top 10 con mayor valor</h5>
-                    <ul>
-                      {rankingData.top.map((item) => (
-                        <li key={`top-${item.nombre}`}>
-                          <div className="mapa-bar">
-                            <div
-                              className="mapa-bar__fill"
-                              style={{
-                                width: (() => {
-                                  const { min, max } = rankingData.topRange;
-                                  if (min == null || max == null) return "0%";
-                                  const span = max - min || 1;
-                                  const pct = ((item.valor - min) / span) * 100;
-                                  return `${Math.min(100, Math.max(5, pct))}%`;
-                                })(),
-                              }}
-                            />
-                          </div>
-                          <div className="mapa-bar__info">
-                            <span className="mapa-bar__label">{item.nombre}</span>
-                            <span className="mapa-bar__value">{formatNumber(item.valor)}</span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="mapa-ranking__group">
-                    <h5>Top 10 con menor valor</h5>
-                    <ul>
-                      {rankingData.bottom.map((item) => (
-                        <li key={`bottom-${item.nombre}`}>
-                          <div className="mapa-bar mapa-bar--secondary">
-                            <div
-                              className="mapa-bar__fill"
-                              style={{
-                                width: (() => {
-                                  const { min, max } = rankingData.bottomRange;
-                                  if (min == null || max == null) return "0%";
-                                  const span = max - min || 1;
-                                  const pct = ((item.valor - min) / span) * 100;
-                                  return `${Math.min(100, Math.max(5, pct))}%`;
-                                })(),
-                              }}
-                            />
-                          </div>
-                          <div className="mapa-bar__info">
-                            <span className="mapa-bar__label">{item.nombre}</span>
-                            <span className="mapa-bar__value">{formatNumber(item.valor)}</span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ) : (
-                <p className="mapa-ranking__empty">
-                  Carga datos para visualizar los municipios con valores extremos.
-                </p>
-              )}
-            </div>
-          </section>
-        </div>
+        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ opacity: 0.8, fontSize: 13 }}>Ciclo</span>
+          <select
+            value={yearKey}
+            onChange={(e) => setYearKey(e.target.value)}
+            style={{ padding: "6px 10px", borderRadius: 8 }}
+          >
+            {yearOptions.map((o) => (
+              <option key={o.key} value={o.key}>
+                {o.cycle}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
-      <div ref={tooltipRef} className="mapa-tooltip" />
-    </div>
+      <div
+        style={{
+          position: "relative",
+          marginTop: 10,
+          borderRadius: 14,
+          border: "1px solid rgba(0,0,0,.08)",
+          background: "white",
+          padding: 10,
+          height,
+          overflow: "hidden",
+        }}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
+      >
+        {svgWithColors ? (
+          <div
+            style={{ width: "100%", height: "100%" }}
+            dangerouslySetInnerHTML={{ __html: svgWithColors }}
+          />
+        ) : (
+          <div style={{ padding: 12, opacity: 0.7 }}>Cargando mapa…</div>
+        )}
+
+        {/* Tooltip */}
+        {hover && (
+          <div
+            style={{
+              position: "fixed",
+              left: hover.x + 12,
+              top: hover.y + 12,
+              zIndex: 9999,
+              background: "rgba(0,0,0,.82)",
+              color: "white",
+              padding: "8px 10px",
+              borderRadius: 10,
+              fontSize: 12,
+              maxWidth: 260,
+              pointerEvents: "none",
+            }}
+          >
+            <div style={{ fontWeight: 600 }}>{hover.municipio}</div>
+            <div style={{ opacity: 0.85 }}>CVE: {hover.cve}</div>
+            <div style={{ marginTop: 4 }}>
+              {String(yearKey).match(/\d{4}-\d{4}/)?.[0] ?? "Ciclo"}:{" "}
+              <b>{hover.value ?? "s/d"}</b>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Leyenda simple */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10, alignItems: "center" }}>
+        <span style={{ fontSize: 12, opacity: 0.75 }}>Bajo</span>
+        {fills.map((c, i) => (
+          <span
+            key={i}
+            title={`Nivel ${i + 1}`}
+            style={{
+              width: 18,
+              height: 12,
+              background: c,
+              borderRadius: 4,
+              border: "1px solid rgba(0,0,0,.12)",
+              display: "inline-block",
+            }}
+          />
+        ))}
+        <span style={{ fontSize: 12, opacity: 0.75 }}>Alto</span>
+        <span style={{ marginLeft: 8, fontSize: 12, opacity: 0.7 }}>Sin dato: gris</span>
+      </div>
+    </section>
   );
 }

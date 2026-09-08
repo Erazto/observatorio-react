@@ -30,3 +30,9 @@ Cada eje se clasifica en cinco grupos; sus cruces forman una matriz de 25 colore
 Ejecutar `node scripts/test-map.mjs` y `npm run build`. Las pruebas cubren porcentajes reales de Excel, columnas repetidas, títulos antes del encabezado, empates, cinco clases, cortes Dalenius–Hodges, correlación positiva/negativa/nula/indefinida, matriz bivariada y los 125 municipios del SVG.
 
 Prueba de navegador realizada sobre la compilación de producción en Chrome: carga del Excel municipal incluido, selección de Toluca y Metepec, cinco clases, matriz bivariada de 25 colores, Pearson, PNG con exactamente dos municipios y crédito institucional, y carga posterior de un Excel con porcentajes nativos/textuales. Sin excepciones JavaScript durante el flujo. El PNG también se inspeccionó visualmente.
+
+## Revisión del flujo guiado previa a publicación
+
+Se verificó en Chrome la compilación de producción a 1440 px y 390 px: los controles de análisis no aparecen antes de cargar el Excel, se requiere elegir tipo de mapa, la segunda columna solo aparece en bivariado y la exportación se habilita con datos. Se probaron la inversión, las barras proporcionales, selección regional, PNG recortado con crédito y carga posterior de porcentajes. No se detectaron excepciones JavaScript ni desbordamiento horizontal de página a 390 px. Capturas inspeccionadas en escritorio y móvil. Esta comprobación no sustituye pruebas de usabilidad con personas ni una matriz completa de navegadores.
+
+Los contadores locales permanecen en un apartado desplegable. La leyenda muestra el número de municipios sin dato; la interfaz limpia guiones bajos de los nombres y muestra una vista de los tonos actuales junto al botón de invertir colores. Las barras usan el mismo origen cero y escala en ambas listas.

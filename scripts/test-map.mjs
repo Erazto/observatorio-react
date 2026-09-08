@@ -49,3 +49,19 @@ const ids=[...svg.matchAll(/<path\b[^>]*\bid="([^"]+)"/g)].map(m=>normalizeMunic
 assert.equal(ids.length,125);
 assert(ids.includes('TOLUCA'));assert(ids.includes('METEPEC'));
 console.log('OK: Excel porcentual nativo/texto, encabezados desplazados/duplicados, validación, 5 clases, Dalenius–Hodges, Pearson, matriz bivariada y 125 municipios.');
+
+// Revisión previa a publicación: cinco gamas, inversión y barras compartidas.
+assert.equal(Object.keys(PALETTES).length,5);
+for(const palette of Object.keys(PALETTES)) {
+  const forward=buildScale([0,25,50,75,100],{palette});
+  const reverse=buildScale([0,25,50,75,100],{palette,reverse:true});
+  assert.deepEqual(reverse.colors,[...forward.colors].reverse());
+  assert.equal(reverse.color(null),NO_DATA_COLOR);
+  assert.deepEqual(reverse.thresholds,forward.thresholds);
+}
+const {buildRankingBars}=await load('src/utils/rankingBars.js');
+assert.equal(buildRankingBars([0,25,100])(25).width,25);
+assert.equal(buildRankingBars([0,0])(0).width,0);
+assert.equal(buildRankingBars([5,5])(5).width,100);
+assert.deepEqual(buildRankingBars([-100,0,100])(-100),{left:0,width:50,zero:50});
+console.log('OK: cinco gamas, inversión sin alterar cortes y barras con ceros, empates y negativos.');
