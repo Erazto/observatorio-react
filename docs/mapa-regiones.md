@@ -1,3 +1,5 @@
+> Exportación actualizada (17 de septiembre de 2026): PNG con fondo transparente, crédito institucional de 28 px debajo del título y acotaciones en el extremo inferior derecho del área cartográfica, con espacio reservado para no tapar municipios. Se eliminan las referencias de región, archivo y hoja en la imagen. El método se identifica como «Método de Estratificación». Estas decisiones sustituyen las descripciones anteriores de posición del crédito y referencias del PNG. Validado exportando el estado completo (125 municipios) y una región (1 municipio), comprobando canal alfa, textos y posiciones, además de inspección visual de ambos PNG.
+
 > Actualización del 17 de septiembre de 2026: la herramienta de Excel ahora representa una sola variable. Se retiraron el texto «1. Carga tus datos», el selector de tipo de mapa y la interfaz bivariada. Tras cargar, se selecciona la primera columna numérica y puede cambiarse directamente. Los apartados bivariados siguientes documentan el comportamiento anterior. Validado con compilación, pruebas de datos y Chrome (carga directa, cambio de columna, navegación y diseño adaptable).
 
 # Mapa por regiones y análisis bivariado

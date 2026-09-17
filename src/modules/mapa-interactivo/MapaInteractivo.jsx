@@ -93,10 +93,7 @@ export default function MapaInteractivo() {
     try{
       const legend=sx.legend.map(l=>({...l,label:`${l.label} (${l.count} municipios)`}));
       legend.push({color:NO_DATA_COLOR,label:`Sin dato (${missingCount} municipios)`});
-      await exportMapPNG(mapRef.current.querySelector('svg'),{selected,title,legend,notes:[
-        `Método: ${METHODS[method]}. Región: ${selected.length?selected.map(id=>id.replace(/_/g,' ')).join(', '):'Estado de México'}.`,
-        `Archivo: ${fileName} · Hoja: ${sheet.name}`,
-      ]});
+      await exportMapPNG(mapRef.current.querySelector('svg'),{selected,title,legend,method:METHODS[method]});
     }catch(e){setExportError(e.message);}finally{exportBusy.current=false;setExporting(false);}
   };
 
@@ -126,9 +123,8 @@ export default function MapaInteractivo() {
           <small>{reverse?'Oscuro → claro':'Claro → oscuro'}</small>
           <div className="mapa-palette-preview" aria-label="Orden actual de colores">{sx.colors.map(color=><span key={color} style={{backgroundColor:color}} />)}</div>
         </div>
-        <label>Método de clasificación<select className="mapa-input" value={method} onChange={e=>setMethod(e.target.value)}>{Object.entries(METHODS).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label>
+        <label>Método de Estratificación<select className="mapa-input" value={method} onChange={e=>setMethod(e.target.value)}>{Object.entries(METHODS).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label>
         <p>{method==='quantiles'?'Cuantiles: busca grupos con cantidades similares de municipios.':method==='equal'?'Intervalos iguales: divide el rango de valores en cinco tramos del mismo tamaño.':'Dalenius–Hodges: utiliza la distribución de frecuencias para formar los grupos.'}</p>
-        <p>Cinco clases por variable. Los empates conservan su color y pueden dejar clases vacías. Los cortes se calculan con la región seleccionada.</p>
         {method==='dalenius'&&<details><summary>Detalle del cálculo</summary><p>Dalenius–Hodges: histograma de intervalos iguales (√n, mínimo 5), suma acumulada de √frecuencia y cortes interpolados en quintas partes.</p></details>}
       </fieldset>
       <div className="mapa-legend">{sx.legend.map((l,i)=><span key={i}><i style={{backgroundColor:l.color}} />{l.label} ({l.count})</span>)}<span><i style={{backgroundColor:NO_DATA_COLOR}} />Sin dato ({missingCount})</span></div>

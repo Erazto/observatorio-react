@@ -1,6 +1,7 @@
 // Ejecutar con npm run preview y Chrome con --remote-debugging-port=9223.
 import assert from 'node:assert/strict'
 import path from 'node:path'
+import fs from 'node:fs'
 const tabs = await (await fetch('http://127.0.0.1:9223/json/list')).json()
 const ws = new WebSocket(tabs.find(t => t.type === 'page').webSocketDebuggerUrl)
 await new Promise(resolve => ws.addEventListener('open', resolve, { once: true }))
@@ -88,6 +89,47 @@ try {
 
   await run(`document.querySelector('.mapa-invert-control button').click();[...document.querySelectorAll('.mapa-municipality-list label')].find(l=>l.textContent==='Toluca').querySelector('input').click()`)
   await wait('document.querySelectorAll(".mapa-selected button").length===1')
+
+  assert.equal(await run(`document.querySelector('.mapa-color-controls').textContent.includes('Método de Estratificación')`), true)
+  assert.equal(await run(`document.querySelector('.mapa-color-controls').textContent.includes('Cinco clases por variable')`), false)
+  await send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: '/tmp/observatorio-export-downloads' })
+  await run(`window.__exportTexts=[];
+    var originalText=CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText=function(text,x,y,...args){window.__exportTexts.push({text,x,y,font:this.font});return originalText.call(this,text,x,y,...args)};
+    var originalBlob=HTMLCanvasElement.prototype.toBlob;
+    HTMLCanvasElement.prototype.toBlob=function(callback,...args){
+      const canvas=this;
+      return originalBlob.call(this,blob=>{
+        window.__exportAlpha=canvas.getContext('2d').getImageData(0,0,1,1).data[3];
+        window.__exportPNG=canvas.toDataURL('image/png');
+        callback(blob);
+      },...args);
+    };
+    var originalSerialize=XMLSerializer.prototype.serializeToString;
+    XMLSerializer.prototype.serializeToString=function(node){window.__exportPathCount=node.querySelectorAll('path[id]').length;return originalSerialize.call(this,node)};
+  `)
+  const checkExport = async (count, name) => {
+    await run(`window.__exportPNG=null;window.__exportTexts=[];[...document.querySelectorAll('button')].find(b=>b.textContent==='Exportar región (PNG)').click()`)
+    await wait('!!window.__exportPNG')
+    assert.equal(await run('window.__exportAlpha'), 0)
+    assert.equal(await run('window.__exportPathCount'), count)
+    const texts=await run('window.__exportTexts')
+    assert(!texts.some(t=>/Región:|Archivo:/.test(t.text)))
+    const credit=texts.find(t=>t.text.includes('Diseño realizado'))
+    const legend=texts.find(t=>t.text==='Acotaciones')
+    assert(credit && credit.y>texts[0].y && credit.font==='28px sans-serif')
+    assert(legend && legend.x>=1100 && legend.y>600)
+    const png=await run('window.__exportPNG')
+    fs.writeFileSync(`/tmp/observatorio-export-${name}.png`,Buffer.from(png.split(',')[1],'base64'))
+    await wait(`![...document.querySelectorAll('button')].some(b=>b.textContent==='Generando PNG…')`)
+  }
+  await checkExport(1,'region')
+  await run(`document.querySelector('.mapa-region-actions button:last-child').click()`)
+  await wait('document.querySelectorAll(".mapa-selected button").length===0')
+  await checkExport(125,'estado')
+  await run(`[...document.querySelectorAll('.mapa-municipality-list label')].find(l=>l.textContent==='Toluca').querySelector('input').click()`)
+  await wait('document.querySelectorAll(".mapa-selected button").length===1')
+
   await run(`window.__savedMap=document.querySelector('.mapa-svg-wrapper svg')`)
   await nav('Docentes')
   assert.equal(await run('location.hash'), '#docentes')
