@@ -62,3 +62,23 @@ La presentación incluye su propio tooltip dentro del elemento que entra en pant
 En ambas vistas, las barras de los diez mínimos se calculan con los valores de esa lista. Con valores positivos su máximo corresponde al 100 %; los máximos mantienen su escala anterior. Una nota distingue las escalas. Se conserva el manejo de ceros, empates y valores negativos alrededor del cero.
 
 Validación: pruebas de proporciones 10/20/50 → 20/40/100 %, compilación, Chrome en pantalla completa nativa y alternativa, tooltip con puntero/foco y en los bordes, escalas de mínimos en ambas vistas, recorte regional y regresión de PNG. Se activó la emulación de foco de página en Chrome sin interfaz para verificar eventos de teclado. Captura de presentación inspeccionada.
+
+## Gamas de los mapas de referencia
+
+Se muestrearon las leyendas y fondos de los PNG/JPG proporcionados, convirtiendo los perfiles ICC a sRGB. Los colores de JPEG son aproximados por compresión. Las referencias son visuales: no se copian sus datos, categorías, umbrales ni logotipos.
+
+| Gama | Cinco colores en orden | Fondo de pantalla |
+| --- | --- | --- |
+| Institucional | `#C4B18F`, `#BC965B`, `#965F36`, `#9F2141`, `#54212C` | `#FFFFFF` |
+| Marginación | `#FFDBD8`, `#F6C3CF`, `#C6667F`, `#5F1729`, `#3C0318` | `#CDAEB8` |
+| Pobreza | `#E8DCD3`, `#D2AA8E`, `#CB7034`, `#611B2A`, `#42061B` | `#CFBAA5` |
+| Grado de resiliencia | `#F0F0F2`, `#BFBFBF`, `#A4A1B8`, `#4F4C64`, `#212029` | `#B5B4C4` |
+| Resiliencia · Aqua (adaptada) | `#DFEFE5`, `#78CCB4`, `#6A8DA0`, `#249383`, `#1A6D63` | `#95BBB8` |
+
+La imagen de clúster tiene cuatro categorías de puntos y dos colores municipales, no cinco estratos ordenados. Su opción aqua es una adaptación de cinco tonos tomada del mapa, los acentos verdes y sus encabezados; se identifica como adaptada en el selector y en una nota. No atribuye las categorías del clúster a los valores cargados.
+
+El PNG institucional tiene transparencia exterior y un área blanca detrás del mapa: se usa blanco como fondo de visualización. Su gama incorpora los cinco colores tierra/guinda y mantiene el gris `#D1D5DB` exclusivo para sin dato. Las otras cuatro gamas anteriores siguen disponibles en «Gamas anteriores»; la institucional se actualiza y queda seleccionada inicialmente.
+
+El fondo cambia en el mapa, el panel de valores y la presentación. Se aplica al contenedor, nunca al SVG ni al lienzo del PNG, cuya transparencia se mantiene. Invertir colores solo invierte los cinco estratos, no el fondo ni sin dato.
+
+Validación de las gamas: pruebas de cinco colores por escala e inversión sin cambiar cortes, compilación y Chrome. Se verificaron los cinco fondos de referencia y se exportó un PNG por gama con alfa cero en el fondo. La presentación conservó el fondo seleccionado en escritorio y móvil, además de tooltip y barras de mínimos. Se inspeccionó la captura con la gama Marginación. La prueba espera el ajuste de tamaño de la ventana antes de medir límites del tooltip; este usa ancho de contenido limitado al viewport.

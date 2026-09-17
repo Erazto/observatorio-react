@@ -1,9 +1,14 @@
+// Colores de las referencias convertidos a sRGB. Los JPG pueden variar ligeramente por compresión.
 export const PALETTES = {
-  categoria1: { label: 'Verde', colors: ['#EDF7F0', '#CDE9D6', '#61BA7D', '#245232', '#16321F'] },
-  azules: { label: 'Azul', colors: ['#EFF6FF', '#BFDBFE', '#60A5FA', '#2563EB', '#1E3A8A'] },
-  lilas: { label: 'Lilas', colors: ['#F5F0FA', '#DDD0ED', '#B49ACF', '#805BA6', '#48256B'] },
-  aqua: { label: 'Aqua', colors: ['#ECFDFB', '#B5EAE3', '#58C4B8', '#218579', '#125249'] },
-  institucional: { label: 'Institucional · Guinda', colors: ['#FAEFF2', '#EAC5CF', '#CE8399', '#9F2241', '#56212F'] },
+  institucional: { label: 'Institucional · Tierra y guinda', reference: true, background: '#FFFFFF', heading: '#54212C', colors: ['#C4B18F', '#BC965B', '#965F36', '#9F2141', '#54212C'] },
+  marginacion: { label: 'Marginación · Rosas', reference: true, background: '#CDAEB8', heading: '#3C0318', colors: ['#FFDBD8', '#F6C3CF', '#C6667F', '#5F1729', '#3C0318'] },
+  pobreza: { label: 'Pobreza · Naranja y guinda', reference: true, background: '#CFBAA5', heading: '#42061B', colors: ['#E8DCD3', '#D2AA8E', '#CB7034', '#611B2A', '#42061B'] },
+  resiliencia: { label: 'Grado de resiliencia · Lilas', reference: true, background: '#B5B4C4', heading: '#212029', colors: ['#F0F0F2', '#BFBFBF', '#A4A1B8', '#4F4C64', '#212029'] },
+  resiliencia_aqua: { label: 'Resiliencia · Aqua (adaptada)', reference: true, background: '#95BBB8', heading: '#174C44', description: 'Cinco tonos inspirados en la referencia de resiliencia. Esta gama es una adaptación para valores ordenados; no representa las categorías del clúster.', colors: ['#DFEFE5', '#78CCB4', '#6A8DA0', '#249383', '#1A6D63'] },
+  categoria1: { label: 'Verde', background: '#F8FAFC', heading: '#56212F', colors: ['#EDF7F0', '#CDE9D6', '#61BA7D', '#245232', '#16321F'] },
+  azules: { label: 'Azul', background: '#F8FAFC', heading: '#56212F', colors: ['#EFF6FF', '#BFDBFE', '#60A5FA', '#2563EB', '#1E3A8A'] },
+  lilas: { label: 'Lilas', background: '#F8FAFC', heading: '#56212F', colors: ['#F5F0FA', '#DDD0ED', '#B49ACF', '#805BA6', '#48256B'] },
+  aqua: { label: 'Aqua', background: '#F8FAFC', heading: '#56212F', colors: ['#ECFDFB', '#B5EAE3', '#58C4B8', '#218579', '#125249'] },
 };
 export const NO_DATA_COLOR = '#D1D5DB';
 export const METHODS = { quantiles: 'Cuantiles', equal: 'Intervalos iguales', dalenius: 'Dalenius–Hodges' };

@@ -50,9 +50,12 @@ assert.equal(ids.length,125);
 assert(ids.includes('TOLUCA'));assert(ids.includes('METEPEC'));
 console.log('OK: Excel porcentual nativo/texto, encabezados desplazados/duplicados, validación, 5 clases, Dalenius–Hodges, Pearson, matriz bivariada y 125 municipios.');
 
-// Revisión previa a publicación: cinco gamas, inversión y barras compartidas.
-assert.equal(Object.keys(PALETTES).length,5);
+// Gamas de referencia y anteriores: inversión y barras.
+assert.equal(Object.values(PALETTES).filter(p=>p.reference).length,5);
 for(const palette of Object.keys(PALETTES)) {
+  assert.equal(PALETTES[palette].colors.length,5);
+  assert.match(PALETTES[palette].background,/^#[0-9A-F]{6}$/);
+  assert(!PALETTES[palette].colors.includes(NO_DATA_COLOR));
   const forward=buildScale([0,25,50,75,100],{palette});
   const reverse=buildScale([0,25,50,75,100],{palette,reverse:true});
   assert.deepEqual(reverse.colors,[...forward.colors].reverse());
@@ -64,7 +67,7 @@ assert.equal(buildRankingBars([0,25,100])(25).width,25);
 assert.equal(buildRankingBars([0,0])(0).width,0);
 assert.equal(buildRankingBars([5,5])(5).width,100);
 assert.deepEqual(buildRankingBars([-100,0,100])(-100),{left:0,width:50,zero:50});
-console.log('OK: cinco gamas, inversión sin alterar cortes y barras con ceros, empates y negativos.');
+console.log('OK: gamas, inversión sin alterar cortes y barras con ceros, empates y negativos.');
 
 const multipleSheets=XLSX.utils.book_new();
 XLSX.utils.book_append_sheet(multipleSheets,XLSX.utils.aoa_to_sheet([['Municipio','Dato'],['Toluca',25]]),'Principal');
@@ -80,3 +83,10 @@ assert.equal(minimumScale(50).width,100);
 assert.equal(minimumScale(20).width,40);
 assert.equal(minimumScale(10).width,20);
 console.log('OK: escala independiente de mínimos con su máximo al 100%.');
+
+assert.equal(PALETTES.marginacion.background,'#CDAEB8');
+assert.equal(PALETTES.pobreza.background,'#CFBAA5');
+assert.equal(PALETTES.resiliencia.background,'#B5B4C4');
+assert.equal(PALETTES.resiliencia_aqua.background,'#95BBB8');
+assert.deepEqual(PALETTES.institucional.colors,['#C4B18F','#BC965B','#965F36','#9F2141','#54212C']);
+console.log('OK: cinco gamas de referencia y fondos para visualización.');

@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useId } from 'react';
 import './mapPresentation.css';
 
-const MapPresentation=forwardRef(function MapPresentation({title,selected,legend,method,ranked,color,formatValue,rankingBar,minimumBar},ref){
+const MapPresentation=forwardRef(function MapPresentation({themeStyle,title,selected,legend,method,ranked,color,formatValue,rankingBar,minimumBar},ref){
   const dialogRef=useRef(null),sheetRef=useRef(null),mapRef=useRef(null),triggerRef=useRef(null),nativeRef=useRef(false),overflowRef=useRef('');
   const tooltipRef=useRef(null),tooltipId=useId();
   const hideTooltip=()=>{if(tooltipRef.current)tooltipRef.current.hidden=true;};
@@ -63,8 +63,8 @@ const MapPresentation=forwardRef(function MapPresentation({title,selected,legend
       if(!dialogRef.current?.open&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});
     }).catch(()=>{});
   }}));
-  return <dialog ref={dialogRef} className="map-presentation" aria-label={`Presentación del mapa: ${title}`} onCancel={event=>{event.preventDefault();close();}}>
-    <div ref={sheetRef} className="map-presentation-sheet" onScrollCapture={()=>{
+  return <dialog ref={dialogRef} className="map-presentation" style={themeStyle} aria-label={`Presentación del mapa: ${title}`} onCancel={event=>{event.preventDefault();close();}}>
+    <div ref={sheetRef} className="map-presentation-sheet" style={themeStyle} onScrollCapture={()=>{
       const focused=document.activeElement;
       if(mapRef.current?.contains(focused)&&focused.matches('path[data-municipality]')){
         const box=focused.getBoundingClientRect();showTooltip(focused,box.left+box.width/2,box.top+box.height/2);

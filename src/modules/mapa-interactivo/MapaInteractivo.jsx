@@ -30,8 +30,10 @@ export default function MapaInteractivo() {
   const [fileName,setFileName]=useState(''),[loading,setLoading]=useState(false),[error,setError]=useState('');
   const [exporting,setExporting]=useState(false),[exportError,setExportError]=useState('');
   const [xId,setXId]=useState('');
-  const [palette,setPalette]=useState('categoria1'),[method,setMethod]=useState('quantiles'),[reverse,setReverse]=useState(false);
+  const [palette,setPalette]=useState('institucional'),[method,setMethod]=useState('quantiles'),[reverse,setReverse]=useState(false);
   const [search,setSearch]=useState(''),[selected,setSelected]=useState([]);
+  const mapTheme=PALETTES[palette];
+  const themeStyle={'--map-background':mapTheme.background,'--map-heading':mapTheme.heading};
   const dataset=sheet?.data;
   const metrics=dataset?.metrics||[];
   const x=metrics.find(m=>m.id===xId);
@@ -100,7 +102,7 @@ export default function MapaInteractivo() {
     }catch(e){setExportError(e.message);}finally{exportBusy.current=false;setExporting(false);}
   };
 
-  return <div className="mapa-interactivo">
+  return <div className="mapa-interactivo" style={themeStyle}>
     <div className="mapa-card">
       <div className="mapa-card__header"><div><p className="mapa-card__eyebrow">Explorador geográfico</p><h3>Mapa interactivo municipal</h3><p>Construye tu mapa paso a paso. Cada elección actualiza la vista automáticamente.</p></div>
         <div className="mapa-card__actions"><a className="mapa-btn mapa-btn--ghost" href="/BD_municipios.xlsx" download>Plantilla Excel</a>
@@ -118,13 +120,14 @@ export default function MapaInteractivo() {
       </section>}
       {dataset&&<>
       <fieldset className="mapa-color-controls"><legend>2. Elige cómo agrupar los valores en colores</legend>
-        <label>Gama<select className="mapa-input" value={palette} onChange={e=>setPalette(e.target.value)}>{Object.entries(PALETTES).map(([id,p])=><option key={id} value={id}>{p.label}</option>)}</select></label><div className="mapa-invert-control">
+        <label>Gama<select className="mapa-input" value={palette} onChange={e=>setPalette(e.target.value)}>{[true,false].map(reference=><optgroup key={String(reference)} label={reference?'Mapas de referencia':'Gamas anteriores'}>{Object.entries(PALETTES).filter(([,p])=>!!p.reference===reference).map(([id,p])=><option key={id} value={id}>{p.label}</option>)}</optgroup>)}</select></label><div className="mapa-invert-control">
           <button type="button" className="mapa-btn mapa-btn--outline" aria-pressed={reverse} onClick={()=>setReverse(value=>!value)}>
             <span aria-hidden="true">⇄</span> {reverse?'Restaurar colores':'Invertir colores'}
           </button>
           <small>{reverse?'Oscuro → claro':'Claro → oscuro'}</small>
           <div className="mapa-palette-preview" aria-label="Orden actual de colores">{sx.colors.map(color=><span key={color} style={{backgroundColor:color}} />)}</div>
         </div>
+        {mapTheme.description&&<p className="mapa-palette-note">{mapTheme.description}</p>}
         <label>Método de Estratificación<select className="mapa-input" value={method} onChange={e=>setMethod(e.target.value)}>{Object.entries(METHODS).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label>
         <p>{method==='quantiles'?'Cuantiles: busca grupos con cantidades similares de municipios.':method==='equal'?'Intervalos iguales: divide el rango de valores en cinco tramos del mismo tamaño.':'Dalenius–Hodges: utiliza la distribución de frecuencias para formar los grupos.'}</p>
         {method==='dalenius'&&<details><summary>Detalle del cálculo</summary><p>Dalenius–Hodges: histograma de intervalos iguales (√n, mínimo 5), suma acumulada de √frecuencia y cortes interpolados en quintas partes.</p></details>}
@@ -168,7 +171,7 @@ export default function MapaInteractivo() {
       </div>
     </div>
     <details className="mapa-usage"><summary>Actividad local de esta herramienta</summary><p>Entradas: {usage.visitas} · Excel cargados: {usage.cargas} · Visualizaciones: {usage.visualizaciones}</p><p>Contadores de este navegador; cambiar región o colores no suma una visualización.</p>{!persistent&&<p>No se pueden guardar los contadores.</p>}</details>
-    <MapPresentation ref={presentationRef} title={title} selected={selected} method={METHODS[method]} ranked={ranked} color={getColor} formatValue={value=>format(value,x?.percent)} rankingBar={rankingBar} minimumBar={minimumBar} legend={[...sx.legend.map(item=>({...item,label:`${item.label} (${item.count} municipios)`})),{color:NO_DATA_COLOR,label:`Sin dato (${missingCount} municipios)`}]} />
+    <MapPresentation themeStyle={themeStyle} ref={presentationRef} title={title} selected={selected} method={METHODS[method]} ranked={ranked} color={getColor} formatValue={value=>format(value,x?.percent)} rankingBar={rankingBar} minimumBar={minimumBar} legend={[...sx.legend.map(item=>({...item,label:`${item.label} (${item.count} municipios)`})),{color:NO_DATA_COLOR,label:`Sin dato (${missingCount} municipios)`}]} />
     <div ref={tooltipRef} className="mapa-tooltip" />
   </div>;
 }

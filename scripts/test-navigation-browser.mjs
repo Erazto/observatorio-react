@@ -131,14 +131,17 @@ try {
     if(!fallback)await wait('document.fullscreenElement===document.querySelector(".map-presentation-sheet")')
     assert.equal(await run('document.querySelectorAll(".map-presentation-map path").length'),count)
     assert.equal(await run('document.querySelectorAll(".map-presentation-legend li").length'),6)
+    assert.equal(await run(`getComputedStyle(document.querySelector('.map-presentation-sheet')).backgroundColor===getComputedStyle(document.querySelector('.mapa-map-panel')).backgroundColor`),true)
+
     assert.equal(await run('document.querySelectorAll(".map-presentation-rankings section").length'),2)
     assert((await run('document.querySelector(".map-presentation-heading p").textContent')).includes('Diseño realizado en el Observatorio'))
     assert.equal(await run('document.querySelector(".map-presentation-sheet").scrollWidth<=innerWidth'),true)
+    await run('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
     await run(`var municipality=document.querySelector('.map-presentation-map path[data-municipality="Toluca"]')||document.querySelector('.map-presentation-map path');
       municipality.dispatchEvent(new MouseEvent('mouseenter',{clientX:innerWidth-5,clientY:innerHeight-5}));`)
     await wait('!document.querySelector(".map-presentation-tooltip").hidden')
     assert.equal(await run(`document.querySelector('.map-presentation-tooltip').textContent===municipality.getAttribute('aria-label')`),true)
-    assert.equal(await run(`(() => {const b=document.querySelector('.map-presentation-tooltip').getBoundingClientRect();return b.left>=0&&b.top>=0&&b.right<=innerWidth&&b.bottom<=innerHeight})()`),true)
+    await wait(`(() => {const b=document.querySelector('.map-presentation-tooltip').getBoundingClientRect();return b.left>=0&&b.top>=0&&b.right<=innerWidth&&b.bottom<=innerHeight})()`)
     assert.equal(await run(`!document.fullscreenElement || document.fullscreenElement.contains(document.querySelector('.map-presentation-tooltip'))`),true)
     await run(`municipality.dispatchEvent(new MouseEvent('mouseleave'));municipality.blur();municipality.focus()`)
     await wait('!document.querySelector(".map-presentation-tooltip").hidden')
@@ -162,6 +165,13 @@ try {
   await checkExport(1,'region')
   await run(`document.querySelector('.mapa-region-actions button:last-child').click()`)
   await wait('document.querySelectorAll(".mapa-selected button").length===0')
+  for(const [palette,background] of Object.entries({institucional:'rgb(255, 255, 255)',marginacion:'rgb(205, 174, 184)',pobreza:'rgb(207, 186, 165)',resiliencia:'rgb(181, 180, 196)',resiliencia_aqua:'rgb(149, 187, 184)'})) {
+    await change('.mapa-color-controls select',palette)
+    await wait(`getComputedStyle(document.querySelector('.mapa-map-panel')).backgroundColor===${JSON.stringify(background)}`)
+    assert.equal(await run(`document.querySelectorAll('.mapa-legend span').length`),6)
+    await checkExport(125,palette)
+  }
+  await change('.mapa-color-controls select','marginacion')
   await checkExport(125,'estado')
   const minimumWidths=await run(`[...document.querySelectorAll('.mapa-extremes-columns .mapa-ranking:last-child .mapa-rank-fill')].map(b=>parseFloat(b.style.width))`)
   assert.equal(Math.max(...minimumWidths),100)
