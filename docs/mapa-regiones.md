@@ -1,3 +1,5 @@
+> Actualización del 17 de septiembre de 2026: la herramienta de Excel ahora representa una sola variable. Se retiraron el texto «1. Carga tus datos», el selector de tipo de mapa y la interfaz bivariada. Tras cargar, se selecciona la primera columna numérica y puede cambiarse directamente. Los apartados bivariados siguientes documentan el comportamiento anterior. Validado con compilación, pruebas de datos y Chrome (carga directa, cambio de columna, navegación y diseño adaptable).
+
 # Mapa por regiones y análisis bivariado
 
 ## Operación
