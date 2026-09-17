@@ -48,3 +48,9 @@ La primera hoja es la única fuente de datos del archivo. Se conservan la valida
 El flujo muestra carga, tipo de mapa/columnas y clasificación; después el mapa a ancho completo, máximos a la izquierda y mínimos a la derecha, y finalmente la selección de municipios para formar una región. En pantallas de hasta 640 px las listas se apilan para mantener la lectura. Se conservan las barras y colores, con botones de exportación antes del mapa y después de la selección.
 
 Validado con pruebas de primera hoja válida/inválida, compilación y Chrome a 1440 y 390 px: orden vertical, dos columnas en escritorio, una en móvil, sin desbordamiento horizontal y conservación de selección/inversión al navegar.
+
+## Presentación del mapa
+
+«Presentar Mapa» aparece junto a ambos botones de exportación. Abre un diálogo con el mapa de la región seleccionada, título, crédito institucional con el año actual, seis acotaciones (cinco clases y sin dato), método de estratificación y las listas de diez valores mayores y menores con sus colores y barras. Usa la pantalla completa nativa cuando está disponible; si no, ocupa la ventana. Se cierra con el botón de salida o Escape, restaura el foco al botón de origen y conserva los datos y la configuración. En celular el contenido se apila y permite desplazamiento vertical.
+
+Se eliminó la frase explicativa bajo la columna y se redujo el espacio entre los pasos 1 y 2. Validación: compilación, pruebas de datos y Chrome con región y estado completo, pantalla completa nativa, alternativa sin permisos, salida, foco, diseño a 1440/390 px y regresión de exportación PNG transparente. Capturas de presentación inspeccionadas visualmente.

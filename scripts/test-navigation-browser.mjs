@@ -19,7 +19,7 @@ const send = (method, params = {}) => new Promise((resolve, reject) => {
   ws.send(JSON.stringify({ id: current, method, params }))
 })
 const run = async expression => {
-  const result = await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })
+  const result = await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true, userGesture: true })
   if (result.exceptionDetails) throw new Error(JSON.stringify(result.exceptionDetails))
   return result.result.value
 }
@@ -123,10 +123,37 @@ try {
     fs.writeFileSync(`/tmp/observatorio-export-${name}.png`,Buffer.from(png.split(',')[1],'base64'))
     await wait(`![...document.querySelectorAll('button')].some(b=>b.textContent==='Generando PNG…')`)
   }
+  const present = async (count, name, fallback=false) => {
+    await run(`var sheet=document.querySelector('.map-presentation-sheet');window.__originalFullscreen=sheet.requestFullscreen;${fallback?"sheet.requestFullscreen=()=>Promise.reject(new Error('Prueba sin fullscreen'));":''}
+      var button=[...document.querySelectorAll('button')].find(b=>b.textContent==='Presentar Mapa');button.focus();button.click()`)
+    await wait('document.querySelector(".map-presentation").open')
+    if(!fallback)await wait('document.fullscreenElement===document.querySelector(".map-presentation-sheet")')
+    assert.equal(await run('document.querySelectorAll(".map-presentation-map path").length'),count)
+    assert.equal(await run('document.querySelectorAll(".map-presentation-legend li").length'),6)
+    assert.equal(await run('document.querySelectorAll(".map-presentation-rankings section").length'),2)
+    assert((await run('document.querySelector(".map-presentation-heading p").textContent')).includes('Diseño realizado en el Observatorio'))
+    assert.equal(await run('document.querySelector(".map-presentation-sheet").scrollWidth<=innerWidth'),true)
+    const shot=await send('Page.captureScreenshot',{format:'png'})
+    fs.writeFileSync(`/tmp/observatorio-present-${name}.png`,Buffer.from(shot.data,'base64'))
+    if(fallback){
+      await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27})
+      await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27})
+    } else await run('document.exitFullscreen()')
+    await wait('!document.querySelector(".map-presentation").open && !document.fullscreenElement')
+    assert.equal(await run('document.activeElement.textContent'),'Presentar Mapa')
+    assert.notEqual(await run('document.body.style.overflow'),'hidden')
+    await run('document.querySelector(".map-presentation-sheet").requestFullscreen=window.__originalFullscreen')
+  }
+  assert.equal(await run(`document.querySelector('.mapa-interactivo').textContent.includes('El color representa el valor de la columna elegida')`),false)
+  await present(1,'region',true)
   await checkExport(1,'region')
   await run(`document.querySelector('.mapa-region-actions button:last-child').click()`)
   await wait('document.querySelectorAll(".mapa-selected button").length===0')
   await checkExport(125,'estado')
+  await present(125,'estado')
+  await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true})
+  await present(125,'mobile',true)
+  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false})
   await run(`[...document.querySelectorAll('.mapa-municipality-list label')].find(l=>l.textContent==='Toluca').querySelector('input').click()`)
   await wait('document.querySelectorAll(".mapa-selected button").length===1')
 

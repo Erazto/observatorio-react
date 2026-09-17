@@ -4,6 +4,7 @@ import { normalizeMunicipality as normalize, parseMapNumber, readFirstMapSheet }
 import { buildRankingBars } from '../../utils/rankingBars';
 import { exportMapPNG } from '../../utils/exportMap';
 import { USAGE_KEY, EMPTY_USAGE, readUsage, incrementUsage } from '../../utils/mapUsage';
+import MapPresentation from './MapPresentation';
 import mapSvgRaw from './MapaMunicipios_2.svg?raw';
 
 const SVG_HTML={__html:mapSvgRaw};
@@ -14,6 +15,7 @@ const format=(v,percent=false)=>Number.isFinite(v)?`${formatter.format(v)}${perc
 
 export default function MapaInteractivo() {
   const uid=useId(),fileInputRef=useRef(null),mapRef=useRef(null),tooltipRef=useRef(null),busy=useRef(false),exportBusy=useRef(false),visited=useRef(false);
+  const presentationRef=useRef(null);
   const [usage,setUsage]=useState(EMPTY_USAGE);
   const usageRef=useRef({...EMPTY_USAGE});
   const [persistent,setPersistent]=useState(true);
@@ -107,12 +109,11 @@ export default function MapaInteractivo() {
       {fileName&&<p>Archivo: <strong>{fileName}</strong> · {matched.length} municipios vinculados al mapa.</p>}
       {!!unmatched.length&&<details><summary>{unmatched.length} nombres no coinciden con el mapa (excluidos del análisis)</summary><p>{unmatched.map(r=>r.name).join(', ')}</p></details>}
       {!dataset&&<p className="mapa-flow-note">Empieza con «Cargar Excel». Si usas la plantilla, primero completa tus indicadores. Después podrás elegir la columna que quieres representar.</p>}
-      {dataset&&<section className="mapa-flow-step" aria-labelledby={`${uid}-analysis`}>
+      {dataset&&<section className="mapa-flow-step mapa-column-step" aria-labelledby={`${uid}-analysis`}>
       <h4 id={`${uid}-analysis`}>1. Elige la columna a representar</h4>
       <div className="mapa-filters-inline">
         <label>Columna a representar<select className="mapa-input" value={xId} onChange={e=>setXId(e.target.value)}>{metrics.map(m=><option key={m.id} value={m.id}>{m.label}</option>)}</select></label>
       </div>
-      <p>El color representa el valor de la columna elegida en cada municipio.</p>
       </section>}
       {dataset&&<>
       <fieldset className="mapa-color-controls"><legend>2. Elige cómo agrupar los valores en colores</legend>
@@ -132,7 +133,7 @@ export default function MapaInteractivo() {
         <h4>3. Revisa el mapa y sus valores</h4>
         <p>{title} · {selected.length?`${selected.length} municipios seleccionados`:'Todo el estado'} · {METHODS[method]}</p>
         {!hasData&&<p role="status">No hay datos suficientes para pintar esta selección. Revisa las columnas o amplía la región.</p>}
-        <button className="mapa-btn" disabled={!hasData||loading||exporting} onClick={exportPNG}>{exporting?'Generando PNG…':'Exportar región (PNG)'}</button>
+        <div className="mapa-view-actions"><button className="mapa-btn" disabled={!hasData||loading||exporting} onClick={exportPNG}>{exporting?'Generando PNG…':'Exportar región (PNG)'}</button><button type="button" className="mapa-btn mapa-btn--outline" disabled={!hasData||loading||exporting} onClick={()=>{hideTooltip();presentationRef.current.open(mapRef.current.querySelector('svg'));}}>Presentar Mapa</button></div>
       </div>
       </>}
       <div className="mapa-content" hidden={!dataset}><div className="mapa-map-panel">{!dataset&&<p>Carga un Excel con datos para colorear el mapa. Se admiten porcentajes de Excel y textos como 25%.</p>}<div ref={mapRef} className="mapa-svg-wrapper" dangerouslySetInnerHTML={SVG_HTML} /></div>
@@ -162,10 +163,11 @@ export default function MapaInteractivo() {
         {!!selected.length&&<div className="mapa-selected">{selected.map(id=><button key={id} onClick={()=>toggle(id)} aria-label={`Quitar ${id.replace(/_/g,' ')}`}>{id.replace(/_/g,' ')} ×</button>)}</div>}
         <div className="mapa-municipality-list">{candidates.map(m=><label key={m.id}><input type="checkbox" checked={selectedSet.has(m.id)} onChange={()=>toggle(m.id)} />{m.name}</label>)}{!candidates.length&&<p>No hay coincidencias.</p>}</div>
       </fieldset>
-      <button className="mapa-btn" disabled={!hasData||loading||exporting} onClick={exportPNG}>{exporting?'Generando PNG…':'Exportar región (PNG)'}</button>
+      <div className="mapa-view-actions"><button className="mapa-btn" disabled={!hasData||loading||exporting} onClick={exportPNG}>{exporting?'Generando PNG…':'Exportar región (PNG)'}</button><button type="button" className="mapa-btn mapa-btn--outline" disabled={!hasData||loading||exporting} onClick={()=>{hideTooltip();presentationRef.current.open(mapRef.current.querySelector('svg'));}}>Presentar Mapa</button></div>
       </div>
     </div>
     <details className="mapa-usage"><summary>Actividad local de esta herramienta</summary><p>Entradas: {usage.visitas} · Excel cargados: {usage.cargas} · Visualizaciones: {usage.visualizaciones}</p><p>Contadores de este navegador; cambiar región o colores no suma una visualización.</p>{!persistent&&<p>No se pueden guardar los contadores.</p>}</details>
+    <MapPresentation ref={presentationRef} title={title} selected={selected} method={METHODS[method]} ranked={ranked} color={getColor} formatValue={value=>format(value,x?.percent)} rankingBar={rankingBar} legend={[...sx.legend.map(item=>({...item,label:`${item.label} (${item.count} municipios)`})),{color:NO_DATA_COLOR,label:`Sin dato (${missingCount} municipios)`}]} />
     <div ref={tooltipRef} className="mapa-tooltip" />
   </div>;
 }
