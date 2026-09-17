@@ -74,3 +74,9 @@ multipleSheets.Sheets.Principal=XLSX.utils.aoa_to_sheet([['Sin datos']]);
 assert.throws(()=>readFirstMapSheet(XLSX,multipleSheets),/primera hoja/);
 assert.throws(()=>readFirstMapSheet(XLSX,{SheetNames:[]}),/no contiene hojas/);
 console.log('OK: solo primera hoja; error explícito sin buscar datos en otras hojas.');
+
+const minimumScale=buildRankingBars([10,20,50]);
+assert.equal(minimumScale(50).width,100);
+assert.equal(minimumScale(20).width,40);
+assert.equal(minimumScale(10).width,20);
+console.log('OK: escala independiente de mínimos con su máximo al 100%.');

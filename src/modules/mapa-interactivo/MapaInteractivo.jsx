@@ -55,6 +55,7 @@ export default function MapaInteractivo() {
   const missingCount=(selected.length||MUNICIPALITIES.length)-region.filter(r=>Number.isFinite(r.x)).length;
   const ranked=region.filter(r=>Number.isFinite(r.x)).sort((a,b)=>a.x-b.x||a.name.localeCompare(b.name,'es'));
   const rankingBar=buildRankingBars(ranked.map(r=>r.x));
+  const minimumBar=buildRankingBars(ranked.slice(0,10).map(r=>r.x));
   const title=x?.label||'Mapa municipal';
   const countedView=useRef('');
   useEffect(()=>{
@@ -138,12 +139,12 @@ export default function MapaInteractivo() {
       </>}
       <div className="mapa-content" hidden={!dataset}><div className="mapa-map-panel">{!dataset&&<p>Carga un Excel con datos para colorear el mapa. Se admiten porcentajes de Excel y textos como 25%.</p>}<div ref={mapRef} className="mapa-svg-wrapper" dangerouslySetInnerHTML={SVG_HTML} /></div>
       <section className="mapa-ranking-panel"><h4>Máximos y mínimos · {x?.label||'Indicador'}</h4><p>Municipios de la región; colores del mapa.</p>
-        <p className="mapa-ranking-help">Las barras de ambas listas usan la misma escala, desde cero, para comparar los valores de la región.</p>
-        <div className="mapa-extremes-columns">{[{title:'10 valores mayores',rows:ranked.slice(-10).reverse()},{title:'10 valores menores',rows:ranked.slice(0,10)}].map(group=>(
+        <p className="mapa-ranking-help">Los mínimos usan una escala propia: el mayor valor de esa lista equivale al 100 % cuando los valores son positivos. Compara las longitudes dentro de cada lista; los valores negativos conservan su referencia en cero.</p>
+        <div className="mapa-extremes-columns">{[{title:'10 valores mayores',rows:ranked.slice(-10).reverse(),bar:rankingBar},{title:'10 valores menores',rows:ranked.slice(0,10),bar:minimumBar}].map(group=>(
           <div className="mapa-ranking" key={group.title}>
             <h5>{group.title}</h5>
             <ul>{group.rows.map(r=>{
-              const bar=rankingBar(r.x);
+              const bar=group.bar(r.x);
               return <li key={r.id} className="mapa-rank-item">
                 <span className="mapa-rank-swatch" style={{backgroundColor:getColor(r)}} aria-hidden="true" />
                 <span>{r.name}</span>
@@ -167,7 +168,7 @@ export default function MapaInteractivo() {
       </div>
     </div>
     <details className="mapa-usage"><summary>Actividad local de esta herramienta</summary><p>Entradas: {usage.visitas} · Excel cargados: {usage.cargas} · Visualizaciones: {usage.visualizaciones}</p><p>Contadores de este navegador; cambiar región o colores no suma una visualización.</p>{!persistent&&<p>No se pueden guardar los contadores.</p>}</details>
-    <MapPresentation ref={presentationRef} title={title} selected={selected} method={METHODS[method]} ranked={ranked} color={getColor} formatValue={value=>format(value,x?.percent)} rankingBar={rankingBar} legend={[...sx.legend.map(item=>({...item,label:`${item.label} (${item.count} municipios)`})),{color:NO_DATA_COLOR,label:`Sin dato (${missingCount} municipios)`}]} />
+    <MapPresentation ref={presentationRef} title={title} selected={selected} method={METHODS[method]} ranked={ranked} color={getColor} formatValue={value=>format(value,x?.percent)} rankingBar={rankingBar} minimumBar={minimumBar} legend={[...sx.legend.map(item=>({...item,label:`${item.label} (${item.count} municipios)`})),{color:NO_DATA_COLOR,label:`Sin dato (${missingCount} municipios)`}]} />
     <div ref={tooltipRef} className="mapa-tooltip" />
   </div>;
 }

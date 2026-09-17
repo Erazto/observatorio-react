@@ -54,3 +54,11 @@ Validado con pruebas de primera hoja válida/inválida, compilación y Chrome a 
 «Presentar Mapa» aparece junto a ambos botones de exportación. Abre un diálogo con el mapa de la región seleccionada, título, crédito institucional con el año actual, seis acotaciones (cinco clases y sin dato), método de estratificación y las listas de diez valores mayores y menores con sus colores y barras. Usa la pantalla completa nativa cuando está disponible; si no, ocupa la ventana. Se cierra con el botón de salida o Escape, restaura el foco al botón de origen y conserva los datos y la configuración. En celular el contenido se apila y permite desplazamiento vertical.
 
 Se eliminó la frase explicativa bajo la columna y se redujo el espacio entre los pasos 1 y 2. Validación: compilación, pruebas de datos y Chrome con región y estado completo, pantalla completa nativa, alternativa sin permisos, salida, foco, diseño a 1440/390 px y regresión de exportación PNG transparente. Capturas de presentación inspeccionadas visualmente.
+
+### Tooltip y escala de mínimos
+
+La presentación incluye su propio tooltip dentro del elemento que entra en pantalla completa. Los municipios muestran nombre, columna y valor al pasar el puntero, recibir foco de teclado o tocarse. El texto usa `textContent`, respeta porcentajes y permanece dentro de la ventana. El SVG de presentación no modifica la selección.
+
+En ambas vistas, las barras de los diez mínimos se calculan con los valores de esa lista. Con valores positivos su máximo corresponde al 100 %; los máximos mantienen su escala anterior. Una nota distingue las escalas. Se conserva el manejo de ceros, empates y valores negativos alrededor del cero.
+
+Validación: pruebas de proporciones 10/20/50 → 20/40/100 %, compilación, Chrome en pantalla completa nativa y alternativa, tooltip con puntero/foco y en los bordes, escalas de mínimos en ambas vistas, recorte regional y regresión de PNG. Se activó la emulación de foco de página en Chrome sin interfaz para verificar eventos de teclado. Captura de presentación inspeccionada.

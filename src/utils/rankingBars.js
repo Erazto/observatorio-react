@@ -1,4 +1,4 @@
-// Una escala compartida por máximos y mínimos, con origen en cero.
+// Escala para los valores recibidos, con origen en cero y soporte de negativos.
 export function buildRankingBars(values) {
   const valid = values.filter(Number.isFinite)
   const min = Math.min(0, ...valid)

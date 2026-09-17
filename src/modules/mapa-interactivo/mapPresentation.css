@@ -37,3 +37,8 @@
 @media (max-width: 480px) {
   .map-presentation-rankings, .map-presentation-legend ul { grid-template-columns: 1fr; }
 }
+
+.map-presentation-tooltip { position: fixed; z-index: 10; max-width: min(320px, calc(100vw - 16px)); padding: 10px 14px; border-radius: 8px; background: #172033; color: #fff; box-shadow: 0 4px 16px #0003; white-space: pre-line; overflow-wrap: anywhere; font-size: .9rem; line-height: 1.5; pointer-events: none; }
+.map-presentation-tooltip[hidden] { display: none; }
+.map-presentation-scale-note { font-size: .8rem; line-height: 1.4; color: #475569; margin: 0 0 12px; }
+.map-presentation-map path:focus-visible { outline: none; stroke: #9f2241 !important; stroke-width: 2px !important; }
