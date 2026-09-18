@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import Chart from "../utils/chart";
-import MapaMatriculaMS from "./mapa-interactivo/MapaMatriculaMS";
 
 const PROYECCION_START_INDEX = 7; // 2026-2027
 
@@ -446,8 +445,6 @@ function CoberturaEMS() {
           </tbody>
         </table>
       </div>
-
-      <MapaMatriculaMS />
     </section>
   );
 }

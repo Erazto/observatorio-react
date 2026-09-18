@@ -4,12 +4,13 @@ const defaultFilters = (ciclo) => ({ ciclo, macroNivel: 'todos', nivel: 'todos',
 
 export function useFilters(initial = {}) {
   const ciclo = initial.ciclo || '2024-2025'
-  const [storedFilters, setFilters] = useState(() => defaultFilters(ciclo))
-  let filters = storedFilters
+  const [prevCiclo, setPrevCiclo] = useState(ciclo)
+  const [filtersState, setFilters] = useState(() => defaultFilters(ciclo))
 
-  // Reiniciar juntos antes de pintar para no mezclar filtros anteriores con datos nuevos.
-  // También se actualizan las secciones ocultas, sin depender de desmontarlas con key.
-  if (storedFilters.ciclo !== ciclo) {
+  // Sincronizar de forma limpia cuando cambia el ciclo escolar
+  let filters = filtersState
+  if (prevCiclo !== ciclo) {
+    setPrevCiclo(ciclo)
     filters = defaultFilters(ciclo)
     setFilters(filters)
   }

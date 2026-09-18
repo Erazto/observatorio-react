@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#faf9f6" />
+    <title>En mantenimiento | Observatorio Educativo</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 32px 24px; background: #faf9f6; color: #333638; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      main { width: 100%; max-width: 560px; text-align: center; }
+      .name { margin: 0 0 48px; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #686b6e; }
+      img { display: block; width: 100%; max-width: 480px; height: auto; margin: 0 auto 36px; image-rendering: pixelated; }
+      h1 { margin: 0 0 18px; font-size: clamp(28px, 6vw, 40px); line-height: 1.15; letter-spacing: -.04em; }
+      .message { max-width: 400px; margin: 0 auto; color: #686b6e; font-size: 17px; line-height: 1.7; }
+      .thanks { margin: 40px 0 0; font-size: 13px; color: #686b6e; }
+      .still { display: none; }
+      @media (prefers-reduced-motion: reduce) { .animated { display: none; } .still { display: block; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="name">Observatorio Educativo · Estado de México</p>
+      <img class="animated" src="/dinosaurio.gif" width="480" height="160" alt="Dinosaurio pixelado corriendo mientras hacemos mejoras" />
+      <img class="still" src="/dinosaurio.png" width="480" height="160" alt="Dinosaurio pixelado" />
+      <h1>Estamos en mantenimiento</h1>
+      <p class="message">Estamos haciendo mejoras en el Observatorio.<br />Volveremos pronto.</p>
+      <p class="thanks">Gracias por tu paciencia.</p>
+    </main>
+  </body>
+</html>

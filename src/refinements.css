@@ -38,6 +38,17 @@ main { max-width: 1440px; padding: clamp(16px, 3vw, 36px); margin-inline: auto; 
 .metric-card:hover { transform: none; box-shadow: var(--shadow-lg); }
 .metric-value, .detail-value, .stats-table, .mapa-usage strong { font-variant-numeric: tabular-nums; }
 .metric-value { letter-spacing: -.045em; }
+.metric-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
+  padding-top: 20px;
+}
+.metric-details .detail-item { min-width: 0; }
+.metric-details .detail-value { white-space: nowrap; }
+@media (max-width: 360px) {
+  .metric-details { grid-template-columns: 1fr; }
+}
 .chart-container, .stats-table-container, .mapa-card { border: 1px solid #e2e8f0; box-shadow: var(--shadow); }
 .chart-title { letter-spacing: -.02em; }
 .stats-table-container { overflow-x: auto; overscroll-behavior-inline: contain; }
@@ -130,3 +141,8 @@ main { max-width: 1440px; padding: clamp(16px, 3vw, 36px); margin-inline: auto; 
 @media (max-width: 640px) {
   .mapa-extremes-columns { grid-template-columns: 1fr; gap: 20px; }
 }
+
+.global-cycle-selector { display:flex; align-items:center; justify-content:center; gap:.65rem; margin:.85rem auto 0; font-size:.85rem; font-weight:700; }
+.global-cycle-selector select { min-width:135px; padding:.5rem .7rem; border:1px solid rgba(255,255,255,.6); border-radius:.55rem; background:#fff; color:#242424; }
+.global-cycle-selector small { max-width:28rem; color:#fff; font-weight:400; }
+@media (max-width:640px) { .global-cycle-selector { flex-wrap:wrap; } }

@@ -1,10 +1,22 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import planesData from '../data/planesProgramas.json'
 import { useFilters } from '../hooks/useFilters'
 import {
   obtenerSubnivelesFiltrados,
   filtrarPlanesPorEstatus,
 } from '../utils/filterPlanesProgramas'
+import Icon from '../components/Icon'
+
+const ALL_PLANES = planesData.niveles.flatMap((n) => n.subniveles.flatMap((sub) => sub.planes))
+const STATIC_RESUMEN = {
+  total_planes: ALL_PLANES.length,
+  vigentes: ALL_PLANES.filter((p) => p.estatus === 'vigente').length,
+  en_transicion: ALL_PLANES.filter((p) => p.estatus === 'en_transicion').length,
+  en_revision: ALL_PLANES.filter((p) => p.estatus === 'en_revision').length,
+}
+const ALINEACION_PROMEDIO = ALL_PLANES.length
+  ? Math.round(ALL_PLANES.reduce((sum, p) => sum + p.alineacion_marco_legal, 0) / ALL_PLANES.length)
+  : 0
 
 function PlanesSection({ isActive, sectionRef }) {
   const {
@@ -17,20 +29,21 @@ function PlanesSection({ isActive, sectionRef }) {
     filters,
   } = useFilters({ ciclo: planesData.meta.ciclo_vigente })
 
-  const subnivelesFiltrados = obtenerSubnivelesFiltrados(planesData, filters)
-  const subnivelesConEstatus = filtrarPlanesPorEstatus(
-    subnivelesFiltrados,
-    control === 'todos' ? 'todos' : control,
+  const subnivelesFiltrados = useMemo(
+    () => obtenerSubnivelesFiltrados(planesData, filters),
+    [filters],
+  )
+  const subnivelesConEstatus = useMemo(
+    () =>
+      filtrarPlanesPorEstatus(
+        subnivelesFiltrados,
+        control === 'todos' ? 'todos' : control,
+      ),
+    [subnivelesFiltrados, control],
   )
 
-  const planes = planesData.niveles.flatMap((n) => n.subniveles.flatMap((sub) => sub.planes))
-  const resumen = {
-    total_planes: planes.length,
-    vigentes: planes.filter((p) => p.estatus === 'vigente').length,
-    en_transicion: planes.filter((p) => p.estatus === 'en_transicion').length,
-    en_revision: planes.filter((p) => p.estatus === 'en_revision').length,
-  }
-  const alineacionPromedio = planes.length ? Math.round(planes.reduce((sum, p) => sum + p.alineacion_marco_legal, 0) / planes.length) : 0
+  const resumen = STATIC_RESUMEN
+  const alineacionPromedio = ALINEACION_PROMEDIO
   const estatusCatalogo = planesData.estatus_catalogo
 
   const formatNumber = (n) => n.toLocaleString('es-MX')
@@ -74,7 +87,7 @@ function PlanesSection({ isActive, sectionRef }) {
       <div className="general-metrics">
         <div className="metric-card basica">
           <div className="metric-icon basica" aria-hidden="true">
-            <i className="fas fa-book-open"></i>
+            <Icon name="book-open" />
           </div>
           <div className="metric-value">{formatNumber(resumen.total_planes)}</div>
           <div className="metric-label">Planes y programas registrados</div>
@@ -98,7 +111,7 @@ function PlanesSection({ isActive, sectionRef }) {
 
         <div className="metric-card media">
           <div className="metric-icon media" aria-hidden="true">
-            <i className="fas fa-layer-group"></i>
+            <Icon name="layer-group" />
           </div>
           <div className="metric-value">
             {formatNumber(planesData.niveles.length)}
@@ -112,7 +125,7 @@ function PlanesSection({ isActive, sectionRef }) {
 
         <div className="metric-card superior">
           <div className="metric-icon superior" aria-hidden="true">
-            <i className="fas fa-balance-scale"></i>
+            <Icon name="balance-scale" />
           </div>
           <div className="metric-value">{alineacionPromedio}%</div>
           <div className="metric-label">Alineación promedio al marco legal</div>
@@ -334,11 +347,11 @@ function PlanesSection({ isActive, sectionRef }) {
                                   textDecoration: 'none',
                                 }}
                               >
-                                <i
-                                  className="fas fa-file-pdf"
+                                <Icon
+                                  name="file-pdf"
                                   style={{ marginRight: 6 }}
                                   aria-hidden="true"
-                                ></i>
+                                />
                                 Ver documento normativo
                               </a>
                             </div>
@@ -357,4 +370,4 @@ function PlanesSection({ isActive, sectionRef }) {
   )
 }
 
-export default PlanesSection
+export default React.memo(PlanesSection)

@@ -1,7 +1,10 @@
+import cifras from '../data/cifras.generated.json'
 import React, { useEffect, useMemo, useRef } from 'react'
 import { useFilters } from '../hooks/useFilters'
 import { filtrarNivelesEscuelas } from '../utils/filterEscuelas'
 import Chart from '../utils/chart'
+import Icon from '../components/Icon'
+import ControlBarChart from '../components/ControlBarChart'
 
 const MACRO_CONFIG = [
   { id: 'basica', label: 'Básica', subtotalLabel: 'Subtotal Básica' },
@@ -122,65 +125,64 @@ function EscuelasSection({ ciclo, onCicloChange, escuelasData,
   const basicaSummary = macroSummaries.basica
   const mediaSummary = macroSummaries.media_superior
   const superiorSummary = macroSummaries.superior
-  const controlChartCanvasRef = useRef(null)
-  const controlChartRef = useRef(null)
+  const internalPieCanvasRef = useRef(null)
+  const pieChartRef = useRef(null)
+  const actualPieCanvasRef = pieChartCanvasRef || internalPieCanvasRef
 
   useEffect(() => {
-    const canvas = controlChartCanvasRef.current
-    if (!isActive || !canvas || controlChartRef.current) return
+    const canvas = actualPieCanvasRef.current
+    if (!isActive || !canvas) return
+    if (pieChartRef.current) {
+      pieChartRef.current.destroy()
+      pieChartRef.current = null
+    }
 
-    controlChartRef.current = new Chart(canvas, {
-      type: 'bar',
+    const publicas = escuelasData.publico_privado_escolarizada?.publicas ?? 0
+    const privadas = escuelasData.publico_privado_escolarizada?.privadas ?? 0
+    const total = publicas + privadas
+
+    pieChartRef.current = new Chart(canvas, {
+      type: 'doughnut',
       data: {
-        labels: CONTROL_KEYS.map((key) => CONTROL_LABELS[key]),
+        labels: ['Públicas', 'Privadas'],
         datasets: [
           {
-            data: CONTROL_KEYS.map((key) => macroSummaries.overall[key] || 0),
-            backgroundColor: CONTROL_COLORS,
-            borderRadius: 6,
-            maxBarThickness: 72,
-            barPercentage: 0.7,
+            data: [publicas, privadas],
+            backgroundColor: ['#9f2241', '#c3b08f'],
+            borderWidth: 3,
+            hoverOffset: 8,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        layout: { padding: { top: 30, bottom: 10 } },
-        plugins: {
-          legend: { display: false },
-          datalabels: {
-            anchor: 'end',
-            align: 'top',
-            color: '#1e293b',
-            font: { weight: 'bold', size: 13 },
-            formatter: (v) => v.toLocaleString('es-MX'),
-          },
+        animation: {
+          duration: 300,
+          easing: 'easeOutQuart',
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grace: '12%',
-            ticks: { callback: (v) => v.toLocaleString('es-MX') },
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: (ctx) =>
+                `${ctx.label}: ${ctx.raw.toLocaleString('es-MX')} (${total > 0 ? ((ctx.raw / total) * 100).toFixed(1) : 0}%)`,
+            },
+          },
+          datalabels: {
+            color: 'white',
+            font: { weight: 'bold', size: 16 },
+            formatter: (v) => v.toLocaleString('es-MX'),
           },
         },
       },
     })
 
     return () => {
-      controlChartRef.current?.destroy()
-      controlChartRef.current = null
+      pieChartRef.current?.destroy()
+      pieChartRef.current = null
     }
-  }, [isActive])
-
-  useEffect(() => {
-    const chart = controlChartRef.current
-    if (!chart) return
-    chart.data.datasets[0].data = CONTROL_KEYS.map(
-      (key) => macroSummaries.overall[key] || 0,
-    )
-    chart.update('none')
-  }, [macroSummaries])
+  }, [isActive, ciclo, escuelasData])
 
   return (
     <section
@@ -205,8 +207,7 @@ function EscuelasSection({ ciclo, onCicloChange, escuelasData,
         <div className="filter-field">
           <label htmlFor="escuelas-ciclo">Ciclo escolar</label>
           <select id="escuelas-ciclo" value={ciclo} onChange={event => onCicloChange(event.target.value)}>
-            <option value="2025-2026">2025-2026 (actual)</option>
-            <option value="2024-2025">2024-2025 (histórico)</option>
+            {Object.keys(cifras).sort().reverse().map(value => <option key={value} value={value}>{value}</option>)}
           </select>
         </div>
         <div className="filter-field">
@@ -244,7 +245,7 @@ function EscuelasSection({ ciclo, onCicloChange, escuelasData,
       <div className="general-metrics">
         <div className="metric-card basica">
           <div className="metric-icon basica" aria-hidden="true">
-            <i className="fas fa-school"></i>
+            <Icon name="school" />
           </div>
           <div className="metric-value">{formatNumber(basicaSummary.total)}</div>
           <div className="metric-label">Educación Básica</div>
@@ -278,7 +279,7 @@ function EscuelasSection({ ciclo, onCicloChange, escuelasData,
 
         <div className="metric-card media">
           <div className="metric-icon media" aria-hidden="true">
-            <i className="fas fa-building"></i>
+            <Icon name="building" />
           </div>
           <div className="metric-value">{formatNumber(mediaSummary.total)}</div>
           <div className="metric-label">Media Superior</div>
@@ -306,7 +307,7 @@ function EscuelasSection({ ciclo, onCicloChange, escuelasData,
 
         <div className="metric-card superior">
           <div className="metric-icon superior" aria-hidden="true">
-            <i className="fas fa-university"></i>
+            <Icon name="university" />
           </div>
           <div className="metric-value">{formatNumber(superiorSummary.total)}</div>
           <div className="metric-label">Educación Superior</div>
@@ -375,14 +376,11 @@ function EscuelasSection({ ciclo, onCicloChange, escuelasData,
         <div>
           <h3 className="chart-title">Distribución por Control</h3>
           <div className="chart-container">
-            <div style={{ position: 'relative', height: 340 }}>
-              <canvas
-                role="img"
-                ref={controlChartCanvasRef}
-                aria-label="Gráfico de distribución de escuelas por control administrativo"
-                style={{ width: '100%', height: '100%' }}
-              ></canvas>
-            </div>
+            <ControlBarChart
+              isActive={isActive}
+              data={macroSummaries.overall}
+              ariaLabel="Gráfico de distribución de escuelas por control administrativo"
+            />
           </div>
         </div>
       </div>
@@ -401,8 +399,8 @@ function EscuelasSection({ ciclo, onCicloChange, escuelasData,
             }}
           >
             <canvas
-                role="img"
-              ref={pieChartCanvasRef}
+              role="img"
+              ref={actualPieCanvasRef}
               aria-label="Gráfico de distribución de escuelas públicas y privadas"
             ></canvas>
           </div>
@@ -538,4 +536,4 @@ function EscuelasSection({ ciclo, onCicloChange, escuelasData,
   )
 }
 
-export default EscuelasSection
+export default React.memo(EscuelasSection)

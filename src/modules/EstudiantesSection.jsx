@@ -1,8 +1,10 @@
+import cifras from '../data/cifras.generated.json'
 import React, { useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import { useFilters } from '../hooks/useFilters'
 import { filtrarNivelesEstudiantes } from '../utils/filterEstudiantes'
 const CoberturaEMS = lazy(() => import("./CoberturaEMS"));
-import Chart from '../utils/chart'
+import Icon from '../components/Icon'
+import ControlBarChart from '../components/ControlBarChart'
 
 const CONTROL_KEYS = ['estatal', 'federalizado', 'federal', 'autonomo']
 const CONTROL_LABELS = {
@@ -118,67 +120,6 @@ function EstudiantesSection({ ciclo, onCicloChange, estudiantesData, isActive, s
   const basicaSummary = macroSummaries.basica
   const mediaSummary = macroSummaries.media_superior
   const superiorSummary = macroSummaries.superior
-  const controlChartCanvasRef = useRef(null)
-  const controlChartRef = useRef(null)
-
-  useEffect(() => {
-    const canvas = controlChartCanvasRef.current
-    if (!isActive || !canvas || controlChartRef.current) return
-
-    controlChartRef.current = new Chart(canvas, {
-      type: 'bar',
-      data: {
-        labels: CONTROL_KEYS.map((key) => CONTROL_LABELS[key]),
-        datasets: [
-          {
-            data: CONTROL_KEYS.map((key) => macroSummaries.overall[key] || 0),
-            backgroundColor: CONTROL_COLORS,
-            borderRadius: 6,
-            maxBarThickness: 72,
-            barPercentage: 0.7,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        layout: { padding: { top: 30, bottom: 10 } },
-        plugins: {
-          legend: { display: false },
-          datalabels: {
-            anchor: 'end',
-            align: 'top',
-            color: '#1e293b',
-            font: { weight: 'bold', size: 13 },
-            formatter: (v) => v.toLocaleString('es-MX'),
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grace: '12%',
-            ticks: {
-              callback: (v) => v.toLocaleString('es-MX'),
-            },
-          },
-        },
-      },
-    })
-
-    return () => {
-      controlChartRef.current?.destroy()
-      controlChartRef.current = null
-    }
-  }, [isActive])
-
-  useEffect(() => {
-    const chart = controlChartRef.current
-    if (!chart) return
-    chart.data.datasets[0].data = CONTROL_KEYS.map(
-      (key) => macroSummaries.overall[key] || 0,
-    )
-    chart.update('none')
-  }, [macroSummaries])
 
   return (
     <section
@@ -203,8 +144,7 @@ function EstudiantesSection({ ciclo, onCicloChange, estudiantesData, isActive, s
         <div className="filter-field">
           <label htmlFor="estudiantes-ciclo">Ciclo escolar</label>
           <select id="estudiantes-ciclo" value={ciclo} onChange={event => onCicloChange(event.target.value)}>
-            <option value="2025-2026">2025-2026 (actual)</option>
-            <option value="2024-2025">2024-2025 (histórico)</option>
+            {Object.keys(cifras).sort().reverse().map(value => <option key={value} value={value}>{value}</option>)}
           </select>
         </div>
         <div className="filter-field">
@@ -242,7 +182,7 @@ function EstudiantesSection({ ciclo, onCicloChange, estudiantesData, isActive, s
       <div className="general-metrics">
         <div className="metric-card basica">
           <div className="metric-icon basica" aria-hidden="true">
-            <i className="fas fa-child"></i>
+            <Icon name="child" />
           </div>
           <div className="metric-value">{formatNumber(basicaSummary.total)}</div>
           <div className="metric-label">Educación Básica</div>
@@ -276,7 +216,7 @@ function EstudiantesSection({ ciclo, onCicloChange, estudiantesData, isActive, s
 
         <div className="metric-card media">
           <div className="metric-icon media" aria-hidden="true">
-            <i className="fas fa-user-graduate"></i>
+            <Icon name="user-graduate" />
           </div>
           <div className="metric-value">{formatNumber(mediaSummary.total)}</div>
           <div className="metric-label">Media Superior</div>
@@ -304,7 +244,7 @@ function EstudiantesSection({ ciclo, onCicloChange, estudiantesData, isActive, s
 
         <div className="metric-card superior">
           <div className="metric-icon superior" aria-hidden="true">
-            <i className="fas fa-graduation-cap"></i>
+            <Icon name="graduation-cap" />
           </div>
           <div className="metric-value">{formatNumber(superiorSummary.total)}</div>
           <div className="metric-label">Educación Superior</div>
@@ -373,14 +313,11 @@ function EstudiantesSection({ ciclo, onCicloChange, estudiantesData, isActive, s
         <div>
           <h3 className="chart-title">Distribución por Control</h3>
           <div className="chart-container">
-            <div style={{ position: 'relative', height: 340 }}>
-              <canvas
-                role="img"
-                ref={controlChartCanvasRef}
-                aria-label="Gráfico de distribución de estudiantes por control administrativo"
-                style={{ width: '100%', height: '100%' }}
-              ></canvas>
-            </div>
+            <ControlBarChart
+              isActive={isActive}
+              data={macroSummaries.overall}
+              ariaLabel="Gráfico de distribución de estudiantes por control administrativo"
+            />
           </div>
         </div>
       </div>
@@ -516,7 +453,7 @@ function EstudiantesSection({ ciclo, onCicloChange, estudiantesData, isActive, s
           <p><strong>{estudiantesData.indicadores.cobertura_ems}%</strong> · Modalidad escolarizada y mixta.</p>
           <p>La matrícula escolarizada es de {formatNumber(estudiantesData.subtotales_macro_nivel.media_superior.total)} estudiantes. Tiene un alcance distinto al indicador de cobertura.</p>
           <p><a href={`${estudiantesData.meta.documento_url}#page=24`} target="_blank" rel="noreferrer">Consultar indicador oficial (PDF, página 24)</a></p>
-          <p>Las series y proyecciones anteriores se pueden consultar seleccionando el ciclo histórico 2024-2025.</p>
+          <p>Las series y proyecciones anteriores se pueden consultar seleccionando el ciclo 2024-2025.</p>
         </div>
       ) : isActive ? <Suspense fallback={<p role="status">Cargando series históricas…</p>}><CoberturaEMS /></Suspense> : null}
 
@@ -524,4 +461,4 @@ function EstudiantesSection({ ciclo, onCicloChange, estudiantesData, isActive, s
   )
 }
 
-export default EstudiantesSection
+export default React.memo(EstudiantesSection)

@@ -1,15 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
-
-// Font Awesome desde node_modules
-import "@fortawesome/fontawesome-free/css/all.min.css";
+import { EducationalFiltersProvider } from "./context/EducationalFiltersContext.jsx";
 
 import "./styles.css";
 import "./refinements.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <App />
+    <EducationalFiltersProvider><App /></EducationalFiltersProvider>
   </React.StrictMode>
 );

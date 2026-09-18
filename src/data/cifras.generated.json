@@ -1,0 +1,900 @@
+{
+  "2024-2025": {
+    "estudiantes": {
+      "niveles": [
+        {
+          "id": "inicial",
+          "nombre": "Inicial",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 3548,
+            "federalizado": 2495,
+            "federal": 8558,
+            "autonomo": 46
+          },
+          "total": 14647,
+          "porcentaje_sobre_total": 0.34
+        },
+        {
+          "id": "preescolar",
+          "nombre": "Preescolar",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 259366,
+            "federalizado": 161460,
+            "federal": 6148,
+            "autonomo": 0
+          },
+          "total": 426974,
+          "porcentaje_sobre_total": 9.9
+        },
+        {
+          "id": "primaria",
+          "nombre": "Primaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 944015,
+            "federalizado": 654949,
+            "federal": 3814,
+            "autonomo": 0
+          },
+          "total": 1602778,
+          "porcentaje_sobre_total": 37.2
+        },
+        {
+          "id": "secundaria",
+          "nombre": "Secundaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 498622,
+            "federalizado": 331625,
+            "federal": 2605,
+            "autonomo": 0
+          },
+          "total": 832852,
+          "porcentaje_sobre_total": 19.3
+        },
+        {
+          "id": "media_superior",
+          "nombre": "Media Superior",
+          "macro_nivel": "media_superior",
+          "totales_control": {
+            "estatal": 489882,
+            "federalizado": 0,
+            "federal": 120957,
+            "autonomo": 35971
+          },
+          "total": 646810,
+          "porcentaje_sobre_total": 15
+        },
+        {
+          "id": "licenciatura",
+          "nombre": "Licenciatura",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 141220,
+            "federalizado": 5644,
+            "federal": 180058,
+            "autonomo": 109415
+          },
+          "total": 436337,
+          "porcentaje_sobre_total": 10.1
+        },
+        {
+          "id": "posgrado",
+          "nombre": "Posgrado",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 2188,
+            "federalizado": 219,
+            "federal": 14027,
+            "autonomo": 6162
+          },
+          "total": 22596,
+          "porcentaje_sobre_total": 0.5
+        }
+      ],
+      "meta": {
+        "ciclo": "2024-2025",
+        "total_general": 4307842
+      },
+      "controles_totales": {
+        "estatal": 2427860,
+        "federalizado": 1190133,
+        "federal": 451503,
+        "autonomo": 238346
+      },
+      "subtotales_macro_nivel": {
+        "basica": {
+          "estatal": 1705551,
+          "federalizado": 1150529,
+          "federal": 21125,
+          "autonomo": 46,
+          "total": 2877251
+        },
+        "media_superior": {
+          "estatal": 489882,
+          "federalizado": 0,
+          "federal": 120957,
+          "autonomo": 35971,
+          "total": 646810
+        },
+        "superior": {
+          "estatal": 143408,
+          "federalizado": 5863,
+          "federal": 194085,
+          "autonomo": 115577,
+          "total": 458933
+        }
+      },
+      "modalidades": {
+        "escolarizada": {
+          "estatal": 2338841,
+          "federalizado": 1156392,
+          "federal": 336167,
+          "autonomo": 151594,
+          "total": 3982994
+        },
+        "no_escolarizada": {
+          "estatal": 89019,
+          "federalizado": 33741,
+          "federal": 115336,
+          "autonomo": 86752,
+          "total": 324848
+        }
+      }
+    },
+    "docentes": {
+      "niveles": [
+        {
+          "id": "inicial",
+          "nombre": "Inicial",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 345,
+            "federalizado": 169,
+            "federal": 169,
+            "autonomo": 4
+          },
+          "total": 687,
+          "porcentaje_sobre_total": 0.27
+        },
+        {
+          "id": "preescolar",
+          "nombre": "Preescolar",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 14769,
+            "federalizado": 8591,
+            "federal": 830,
+            "autonomo": 0
+          },
+          "total": 24190,
+          "porcentaje_sobre_total": 9.6
+        },
+        {
+          "id": "primaria",
+          "nombre": "Primaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 40767,
+            "federalizado": 27662,
+            "federal": 430,
+            "autonomo": 0
+          },
+          "total": 68859,
+          "porcentaje_sobre_total": 27.4
+        },
+        {
+          "id": "secundaria",
+          "nombre": "Secundaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 31661,
+            "federalizado": 15601,
+            "federal": 294,
+            "autonomo": 0
+          },
+          "total": 47556,
+          "porcentaje_sobre_total": 18.9
+        },
+        {
+          "id": "media_superior",
+          "nombre": "Media Superior",
+          "macro_nivel": "media_superior",
+          "totales_control": {
+            "estatal": 30672,
+            "federalizado": 0,
+            "federal": 7748,
+            "autonomo": 4115
+          },
+          "total": 42535,
+          "porcentaje_sobre_total": 16.9
+        },
+        {
+          "id": "licenciatura",
+          "nombre": "Licenciatura",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 9467,
+            "federalizado": 399,
+            "federal": 14141,
+            "autonomo": 15078
+          },
+          "total": 39085,
+          "porcentaje_sobre_total": 15.5
+        },
+        {
+          "id": "posgrado",
+          "nombre": "Posgrado",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 775,
+            "federalizado": 29,
+            "federal": 2724,
+            "autonomo": 4091
+          },
+          "total": 7619,
+          "porcentaje_sobre_total": 3
+        }
+      ],
+      "meta": {
+        "ciclo": "2024-2025",
+        "total_general": 251802
+      },
+      "controles_totales": {
+        "estatal": 154816,
+        "federalizado": 54385,
+        "federal": 34705,
+        "autonomo": 27896
+      },
+      "subtotales_macro_nivel": {
+        "basica": {
+          "estatal": 87542,
+          "federalizado": 52023,
+          "federal": 1723,
+          "autonomo": 4,
+          "total": 141292
+        },
+        "media_superior": {
+          "estatal": 30672,
+          "federalizado": 0,
+          "federal": 7748,
+          "autonomo": 4115,
+          "total": 42535
+        },
+        "superior": {
+          "estatal": 10242,
+          "federalizado": 428,
+          "federal": 16865,
+          "autonomo": 19169,
+          "total": 46704
+        }
+      },
+      "modalidades": {
+        "escolarizada": {
+          "estatal": 128456,
+          "federalizado": 52451,
+          "federal": 26336,
+          "autonomo": 23288,
+          "total": 230531
+        },
+        "no_escolarizada": {
+          "estatal": 6360,
+          "federalizado": 1934,
+          "federal": 8369,
+          "autonomo": 4608,
+          "total": 21271
+        }
+      },
+      "conocimiento": {
+        "inicial": 64,
+        "actual": 86,
+        "mejora": 34
+      }
+    },
+    "escuelas": {
+      "niveles": [
+        {
+          "id": "inicial",
+          "nombre": "Inicial",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 145,
+            "federalizado": 111,
+            "federal": 72,
+            "autonomo": 1
+          },
+          "total": 329,
+          "porcentaje_sobre_total": 1.3
+        },
+        {
+          "id": "preescolar",
+          "nombre": "Preescolar",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 3997,
+            "federalizado": 2683,
+            "federal": 752,
+            "autonomo": 0
+          },
+          "total": 7432,
+          "porcentaje_sobre_total": 29.2
+        },
+        {
+          "id": "primaria",
+          "nombre": "Primaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 4283,
+            "federalizado": 3243,
+            "federal": 333,
+            "autonomo": 0
+          },
+          "total": 7859,
+          "porcentaje_sobre_total": 30.1
+        },
+        {
+          "id": "secundaria",
+          "nombre": "Secundaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 2582,
+            "federalizado": 1190,
+            "federal": 253,
+            "autonomo": 0
+          },
+          "total": 4025,
+          "porcentaje_sobre_total": 15.9
+        },
+        {
+          "id": "media_superior",
+          "nombre": "Media Superior",
+          "macro_nivel": "media_superior",
+          "totales_control": {
+            "estatal": 1684,
+            "federalizado": 0,
+            "federal": 353,
+            "autonomo": 145
+          },
+          "total": 2182,
+          "porcentaje_sobre_total": 8.6
+        },
+        {
+          "id": "licenciatura",
+          "nombre": "Licenciatura",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 185,
+            "federalizado": 15,
+            "federal": 300,
+            "autonomo": 90
+          },
+          "total": 590,
+          "porcentaje_sobre_total": 2.3
+        },
+        {
+          "id": "posgrado",
+          "nombre": "Posgrado",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 55,
+            "federalizado": 10,
+            "federal": 165,
+            "autonomo": 49
+          },
+          "total": 279,
+          "porcentaje_sobre_total": 1.1
+        }
+      ],
+      "meta": {
+        "ciclo": "2024-2025",
+        "total_general": 25337
+      },
+      "controles_totales": {
+        "estatal": 14459,
+        "federalizado": 7551,
+        "federal": 2887,
+        "autonomo": 440
+      },
+      "subtotales_macro_nivel": {
+        "basica": {
+          "estatal": 11007,
+          "federalizado": 7227,
+          "federal": 1410,
+          "autonomo": 1,
+          "total": 19645
+        },
+        "media_superior": {
+          "estatal": 1684,
+          "federalizado": 0,
+          "federal": 353,
+          "autonomo": 145,
+          "total": 2182
+        },
+        "superior": {
+          "estatal": 240,
+          "federalizado": 25,
+          "federal": 465,
+          "autonomo": 139,
+          "total": 869
+        }
+      },
+      "modalidades": {
+        "escolarizada": {
+          "estatal": 12931,
+          "federalizado": 7252,
+          "federal": 2228,
+          "autonomo": 285,
+          "total": 22696
+        },
+        "no_escolarizada": {
+          "estatal": 1528,
+          "federalizado": 299,
+          "federal": 659,
+          "autonomo": 155,
+          "total": 2641
+        }
+      },
+      "publico_privado_escolarizada": {
+        "publicas": 20255,
+        "privadas": 5082
+      }
+    }
+  },
+  "2025-2026": {
+    "estudiantes": {
+      "niveles": [
+        {
+          "id": "inicial",
+          "nombre": "Inicial",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 3450,
+            "federalizado": 2501,
+            "federal": 7957,
+            "autonomo": 21
+          },
+          "total": 13929,
+          "porcentaje_sobre_total": 0.33
+        },
+        {
+          "id": "preescolar",
+          "nombre": "Preescolar",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 239453,
+            "federalizado": 151783,
+            "federal": 6430,
+            "autonomo": 0
+          },
+          "total": 397666,
+          "porcentaje_sobre_total": 9.41
+        },
+        {
+          "id": "primaria",
+          "nombre": "Primaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 908655,
+            "federalizado": 635735,
+            "federal": 3807,
+            "autonomo": 0
+          },
+          "total": 1548197,
+          "porcentaje_sobre_total": 36.63
+        },
+        {
+          "id": "secundaria",
+          "nombre": "Secundaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 489628,
+            "federalizado": 333438,
+            "federal": 2668,
+            "autonomo": 0
+          },
+          "total": 825734,
+          "porcentaje_sobre_total": 19.53
+        },
+        {
+          "id": "media_superior",
+          "nombre": "Media Superior",
+          "macro_nivel": "media_superior",
+          "totales_control": {
+            "estatal": 485694,
+            "federalizado": 0,
+            "federal": 123763,
+            "autonomo": 29354
+          },
+          "total": 638811,
+          "porcentaje_sobre_total": 15.11
+        },
+        {
+          "id": "licenciatura",
+          "nombre": "Licenciatura",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 146268,
+            "federalizado": 5898,
+            "federal": 176754,
+            "autonomo": 156826
+          },
+          "total": 485746,
+          "porcentaje_sobre_total": 11.49
+        },
+        {
+          "id": "posgrado",
+          "nombre": "Posgrado",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 1989,
+            "federalizado": 162,
+            "federal": 15072,
+            "autonomo": 6165
+          },
+          "total": 23388,
+          "porcentaje_sobre_total": 0.55
+        }
+      ],
+      "meta": {
+        "ciclo": "2025-2026",
+        "total_general": 4227089,
+        "fuente": "G.E.M. Formato 911. Consolidado estadístico de inicio de cursos 2025-2026",
+        "documento_url": "/documentos/consolidado-inicio-2025-2026.pdf",
+        "pagina_pdf": 10,
+        "alcance_niveles": "Modalidad escolarizada"
+      },
+      "controles_totales": {
+        "estatal": 2368847,
+        "federalizado": 1159392,
+        "federal": 459869,
+        "autonomo": 238981
+      },
+      "subtotales_macro_nivel": {
+        "basica": {
+          "estatal": 1641186,
+          "federalizado": 1123457,
+          "federal": 20862,
+          "autonomo": 21,
+          "total": 2785526
+        },
+        "media_superior": {
+          "estatal": 485694,
+          "federalizado": 0,
+          "federal": 123763,
+          "autonomo": 29354,
+          "total": 638811
+        },
+        "superior": {
+          "estatal": 148257,
+          "federalizado": 6060,
+          "federal": 191826,
+          "autonomo": 162991,
+          "total": 509134
+        }
+      },
+      "modalidades": {
+        "escolarizada": {
+          "estatal": 2275137,
+          "federalizado": 1129517,
+          "federal": 336451,
+          "autonomo": 192366,
+          "total": 3933471
+        },
+        "no_escolarizada": {
+          "estatal": 93710,
+          "federalizado": 29875,
+          "federal": 123418,
+          "autonomo": 46615,
+          "total": 293618
+        }
+      },
+      "indicadores": {
+        "cobertura_ems": 75.9,
+        "pagina_pdf": 24,
+        "alcance": "Modalidad escolarizada y mixta"
+      }
+    },
+    "docentes": {
+      "niveles": [
+        {
+          "id": "inicial",
+          "nombre": "Inicial",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 318,
+            "federalizado": 169,
+            "federal": 95,
+            "autonomo": 3
+          },
+          "total": 585,
+          "porcentaje_sobre_total": 0.23
+        },
+        {
+          "id": "preescolar",
+          "nombre": "Preescolar",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 14544,
+            "federalizado": 8462,
+            "federal": 759,
+            "autonomo": 0
+          },
+          "total": 23765,
+          "porcentaje_sobre_total": 9.15
+        },
+        {
+          "id": "primaria",
+          "nombre": "Primaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 40525,
+            "federalizado": 27436,
+            "federal": 427,
+            "autonomo": 0
+          },
+          "total": 68388,
+          "porcentaje_sobre_total": 26.34
+        },
+        {
+          "id": "secundaria",
+          "nombre": "Secundaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 31665,
+            "federalizado": 15592,
+            "federal": 319,
+            "autonomo": 0
+          },
+          "total": 47576,
+          "porcentaje_sobre_total": 18.33
+        },
+        {
+          "id": "media_superior",
+          "nombre": "Media Superior",
+          "macro_nivel": "media_superior",
+          "totales_control": {
+            "estatal": 29980,
+            "federalizado": 0,
+            "federal": 7669,
+            "autonomo": 3278
+          },
+          "total": 40927,
+          "porcentaje_sobre_total": 15.77
+        },
+        {
+          "id": "licenciatura",
+          "nombre": "Licenciatura",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 9350,
+            "federalizado": 403,
+            "federal": 14853,
+            "autonomo": 17144
+          },
+          "total": 41750,
+          "porcentaje_sobre_total": 16.08
+        },
+        {
+          "id": "posgrado",
+          "nombre": "Posgrado",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 917,
+            "federalizado": 38,
+            "federal": 2881,
+            "autonomo": 4203
+          },
+          "total": 8039,
+          "porcentaje_sobre_total": 3.1
+        }
+      ],
+      "meta": {
+        "ciclo": "2025-2026",
+        "total_general": 259595,
+        "fuente": "G.E.M. Formato 911. Consolidado estadístico de inicio de cursos 2025-2026",
+        "documento_url": "/documentos/consolidado-inicio-2025-2026.pdf",
+        "pagina_pdf": 11,
+        "alcance_niveles": "Modalidad escolarizada"
+      },
+      "controles_totales": {
+        "estatal": 133935,
+        "federalizado": 54054,
+        "federal": 35686,
+        "autonomo": 35920
+      },
+      "subtotales_macro_nivel": {
+        "basica": {
+          "estatal": 87052,
+          "federalizado": 51659,
+          "federal": 1600,
+          "autonomo": 3,
+          "total": 140314
+        },
+        "media_superior": {
+          "estatal": 29980,
+          "federalizado": 0,
+          "federal": 7669,
+          "autonomo": 3278,
+          "total": 40927
+        },
+        "superior": {
+          "estatal": 10267,
+          "federalizado": 441,
+          "federal": 17734,
+          "autonomo": 21347,
+          "total": 49789
+        }
+      },
+      "modalidades": {
+        "escolarizada": {
+          "estatal": 127299,
+          "federalizado": 52100,
+          "federal": 27003,
+          "autonomo": 24628,
+          "total": 231030
+        },
+        "no_escolarizada": {
+          "estatal": 6636,
+          "federalizado": 1954,
+          "federal": 8683,
+          "autonomo": 11292,
+          "total": 28565
+        }
+      }
+    },
+    "escuelas": {
+      "niveles": [
+        {
+          "id": "inicial",
+          "nombre": "Inicial",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 148,
+            "federalizado": 111,
+            "federal": 67,
+            "autonomo": 1
+          },
+          "total": 327,
+          "porcentaje_sobre_total": 1.31
+        },
+        {
+          "id": "preescolar",
+          "nombre": "Preescolar",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 3952,
+            "federalizado": 2641,
+            "federal": 772,
+            "autonomo": 0
+          },
+          "total": 7365,
+          "porcentaje_sobre_total": 29.49
+        },
+        {
+          "id": "primaria",
+          "nombre": "Primaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 4278,
+            "federalizado": 3242,
+            "federal": 343,
+            "autonomo": 0
+          },
+          "total": 7863,
+          "porcentaje_sobre_total": 31.49
+        },
+        {
+          "id": "secundaria",
+          "nombre": "Secundaria",
+          "macro_nivel": "basica",
+          "totales_control": {
+            "estatal": 2577,
+            "federalizado": 1197,
+            "federal": 277,
+            "autonomo": 0
+          },
+          "total": 4051,
+          "porcentaje_sobre_total": 16.22
+        },
+        {
+          "id": "media_superior",
+          "nombre": "Media Superior",
+          "macro_nivel": "media_superior",
+          "totales_control": {
+            "estatal": 1697,
+            "federalizado": 0,
+            "federal": 367,
+            "autonomo": 145
+          },
+          "total": 2209,
+          "porcentaje_sobre_total": 8.85
+        },
+        {
+          "id": "licenciatura",
+          "nombre": "Licenciatura",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 187,
+            "federalizado": 15,
+            "federal": 296,
+            "autonomo": 95
+          },
+          "total": 593,
+          "porcentaje_sobre_total": 2.37
+        },
+        {
+          "id": "posgrado",
+          "nombre": "Posgrado",
+          "macro_nivel": "superior",
+          "totales_control": {
+            "estatal": 58,
+            "federalizado": 10,
+            "federal": 168,
+            "autonomo": 49
+          },
+          "total": 285,
+          "porcentaje_sobre_total": 1.14
+        }
+      ],
+      "meta": {
+        "ciclo": "2025-2026",
+        "total_general": 24972,
+        "fuente": "G.E.M. Formato 911. Consolidado estadístico de inicio de cursos 2025-2026",
+        "documento_url": "/documentos/consolidado-inicio-2025-2026.pdf",
+        "pagina_pdf": 12,
+        "alcance_niveles": "Modalidad escolarizada"
+      },
+      "controles_totales": {
+        "estatal": 14427,
+        "federalizado": 7517,
+        "federal": 2636,
+        "autonomo": 392
+      },
+      "subtotales_macro_nivel": {
+        "basica": {
+          "estatal": 10955,
+          "federalizado": 7191,
+          "federal": 1459,
+          "autonomo": 1,
+          "total": 19606
+        },
+        "media_superior": {
+          "estatal": 1697,
+          "federalizado": 0,
+          "federal": 367,
+          "autonomo": 145,
+          "total": 2209
+        },
+        "superior": {
+          "estatal": 245,
+          "federalizado": 25,
+          "federal": 464,
+          "autonomo": 144,
+          "total": 878
+        }
+      },
+      "modalidades": {
+        "escolarizada": {
+          "estatal": 12897,
+          "federalizado": 7216,
+          "federal": 2290,
+          "autonomo": 290,
+          "total": 22693
+        },
+        "no_escolarizada": {
+          "estatal": 1530,
+          "federalizado": 301,
+          "federal": 346,
+          "autonomo": 102,
+          "total": 2279
+        }
+      },
+      "publico_privado_escolarizada": {
+        "publicas": 18090,
+        "privadas": 4603
+      }
+    }
+  }
+}

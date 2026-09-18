@@ -5,22 +5,18 @@ import EscuelasSection from './modules/EscuelasSection'
 import PlanesSection from './modules/PlanesSection'
 const MapaInteractivoSection = lazy(() => import('./modules/MapaInteractivoSection'))
 
-import docentesActual from './data/docentes.json'
-import docentesHistorico from './data/historico/2024-2025/docentes.json'
-import estudiantesActual from './data/estudiantes.json'
-import estudiantesHistorico from './data/historico/2024-2025/estudiantes.json'
-import escuelasActual from './data/escuelas.json'
-import escuelasHistorico from './data/historico/2024-2025/escuelas.json'
+import cifras from './data/cifras.generated.json'
 
-import Chart from './utils/chart'
+import Icon from './components/Icon'
 import WelcomeDialog from './components/WelcomeDialog'
 import { useSectionNavigation } from './hooks/useSectionNavigation'
+import { useEducationalFilters } from './context/EducationalFiltersContext'
 
 function App() {
-  const [ciclo, setCiclo] = useState('2025-2026')
-  const docentesData = ciclo === '2025-2026' ? docentesActual : docentesHistorico
-  const estudiantesData = ciclo === '2025-2026' ? estudiantesActual : estudiantesHistorico
-  const escuelasData = ciclo === '2025-2026' ? escuelasActual : escuelasHistorico
+  const { selectedCycle, setSelectedCycle } = useEducationalFilters()
+  const ciclo = Object.hasOwn(cifras, selectedCycle) ? selectedCycle : Object.keys(cifras).sort()[0]
+  const setCiclo = setSelectedCycle
+  const { docentes: docentesData, estudiantes: estudiantesData, escuelas: escuelasData } = cifras[ciclo]
   const [activeSection, navigate] = useSectionNavigation()
   const [mapVisited, setMapVisited] = useState(activeSection === 'mapa')
   const [welcomeOpen, setWelcomeOpen] = useState(() => !window.location.hash)
@@ -34,89 +30,6 @@ function App() {
   const escuelasRef = useRef(null)
   const planesRef = useRef(null)
   const mapaRef = useRef(null)
-
-  const pieEscuelasRef = useRef(null)
-
-  const chartsRef = useRef({})
-
-  // Inicializar y actualizar gráficos principales
-  useEffect(() => {
-    if (activeSection !== 'escuelas') return
-    const chartConfig = {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 300,
-        easing: 'easeOutQuart',
-      },
-    }
-
-    const createChart = (key, canvas, config) => {
-      if (!canvas) return
-      if (chartsRef.current[key]) {
-        chartsRef.current[key].destroy()
-        delete chartsRef.current[key]
-      }
-      chartsRef.current[key] = new Chart(canvas, config)
-    }
-
-    const teardownKeys = []
-    const registerChart = (key, canvas, config) => {
-      createChart(key, canvas, config)
-      if (!teardownKeys.includes(key)) {
-        teardownKeys.push(key)
-      }
-    }
-
-    // Pastel escuelas públicas/privadas
-    if (pieEscuelasRef.current) {
-      registerChart('pieEscuelas', pieEscuelasRef.current, {
-        type: 'doughnut',
-        data: {
-          labels: ['Públicas', 'Privadas'],
-          datasets: [
-            {
-              data: [
-                escuelasData.publico_privado_escolarizada.publicas,
-                escuelasData.publico_privado_escolarizada.privadas,
-              ],
-              backgroundColor: ['#9f2241', '#c3b08f'],
-              borderWidth: 3,
-              hoverOffset: 8,
-            },
-          ],
-        },
-        options: {
-          ...chartConfig,
-          plugins: {
-            legend: { position: 'bottom' },
-            tooltip: {
-              callbacks: {
-                label: (ctx) =>
-                  `${ctx.label}: ${ctx.raw.toLocaleString(
-                    'es-MX',
-                  )} (${((ctx.raw / (escuelasData.publico_privado_escolarizada.publicas + escuelasData.publico_privado_escolarizada.privadas)) * 100).toFixed(
-                    1,
-                  )}%)`,
-              },
-            },
-            datalabels: {
-              color: 'white',
-              font: { weight: 'bold', size: 16 },
-              formatter: (v) => v.toLocaleString('es-MX'),
-            },
-          },
-        },
-      })
-    }
-
-    return () => {
-      teardownKeys.forEach((key) => {
-        chartsRef.current[key]?.destroy()
-        delete chartsRef.current[key]
-      })
-    }
-  }, [ciclo, activeSection])
 
   const handleNavClick = (sectionId) => {
     navigate(sectionId)
@@ -134,6 +47,9 @@ function App() {
           <h1>Observatorio Educativo del Estado de México</h1>
         </div>
         <h2>Instituto Superior de Ciencias de la Educación del Estado de México</h2>
+        <form action="/auth/logout" method="post">
+          <button type="submit" className="nav-btn">Cerrar sesión</button>
+        </form>
       </header>
 
       <nav aria-label="Navegación principal" className="main-nav">
@@ -143,7 +59,7 @@ function App() {
           aria-current={activeSection === 'estudiantes' ? 'page' : undefined}
           type="button"
         >
-          <i className="fas fa-user-graduate icon" aria-hidden="true"></i>
+          <Icon name="user-graduate" className="icon" aria-hidden="true" />
           <span className="text">1. Estudiantes</span>
         </button>
 
@@ -153,7 +69,7 @@ function App() {
           aria-current={activeSection === 'docentes' ? 'page' : undefined}
           type="button"
         >
-          <i className="fas fa-chalkboard-teacher icon" aria-hidden="true"></i>
+          <Icon name="chalkboard-teacher" className="icon" aria-hidden="true" />
           <span className="text">2. Docentes</span>
         </button>
 
@@ -163,7 +79,7 @@ function App() {
           aria-current={activeSection === 'escuelas' ? 'page' : undefined}
           type="button"
         >
-          <i className="fas fa-school icon" aria-hidden="true"></i>
+          <Icon name="school" className="icon" aria-hidden="true" />
           <span className="text">3. Escuelas</span>
         </button>
 
@@ -173,7 +89,7 @@ function App() {
           aria-current={activeSection === 'planes' ? 'page' : undefined}
           type="button"
         >
-          <i className="fas fa-book-open icon" aria-hidden="true"></i>
+          <Icon name="book-open" className="icon" aria-hidden="true" />
           <span className="text">4. Planes y Programas</span>
         </button>
 
@@ -183,7 +99,7 @@ function App() {
           aria-current={activeSection === 'mapa' ? 'page' : undefined}
           type="button"
         >
-          <i className="fas fa-map-marked-alt icon" aria-hidden="true"></i>
+          <Icon name="map-marked-alt" className="icon" aria-hidden="true" />
           <span className="text">Mapa interactivo</span>
         </button>
       </nav>
@@ -272,7 +188,6 @@ function App() {
           escuelasData={escuelasData}
           isActive={activeSection === 'escuelas'}
           sectionRef={escuelasRef}
-          pieChartCanvasRef={pieEscuelasRef}
         />
 
         <PlanesSection
@@ -297,6 +212,8 @@ function App() {
             Coordinación de Evaluación del Sistema Educativo Estatal
           </small>
           <div className="footer-links">
+            <a href="/data/observatorio-cifras.xlsx" download>Descargar cifras en Excel</a>
+            <span style={{ margin: '0 10px', opacity: 0.7 }}>•</span>
             <button type="button" className="footer-about" onClick={() => setWelcomeOpen(true)}>Acerca del observatorio</button>
             <span style={{ margin: '0 10px', opacity: 0.7 }}>•</span>
             <a href="#privacidad" aria-label="Política de privacidad">

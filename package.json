@@ -1,14 +1,19 @@
 {
   "name": "observatorio-educativo-edomex",
   "version": "0.0.1",
+  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "npm run data:import && vite",
+    "data:import": "node scripts/educational-workbook.mjs",
+    "build": "npm run data:import && vite build",
+    "build:maintenance": "vite build --config vite.maintenance.config.js",
+    "build:app": "npm run data:import && vite build",
+    "dev:maintenance": "vite --config vite.maintenance.config.js",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.1.0",
+    "@supabase/supabase-js": "^2.116.0",
     "chart.js": "^4.4.4",
     "chartjs-plugin-datalabels": "^2.2.0",
     "react": "^18.3.1",
