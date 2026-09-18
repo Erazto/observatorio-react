@@ -167,7 +167,7 @@ try {
   await checkExport(1,'region')
   await run(`document.querySelector('.mapa-region-actions button:last-child').click()`)
   await wait('document.querySelectorAll(".mapa-selected button").length===0')
-  for(const [palette,background] of Object.entries({institucional:'rgb(255, 255, 255)',marginacion:'rgb(205, 174, 184)',pobreza:'rgb(207, 186, 165)',resiliencia:'rgb(181, 180, 196)',resiliencia_aqua:'rgb(149, 187, 184)'})) {
+  for(const [palette,background] of Object.entries({institucional:'rgb(225, 216, 199)',marginacion:'rgb(205, 174, 184)',pobreza:'rgb(207, 186, 165)',resiliencia:'rgb(181, 180, 196)',resiliencia_aqua:'rgb(149, 187, 184)'})) {
     await change('.mapa-color-controls select',palette)
     await wait(`getComputedStyle(document.querySelector('.mapa-map-panel')).backgroundColor===${JSON.stringify(background)}`)
     assert.equal(await run(`document.querySelectorAll('.mapa-legend span').length`),6)

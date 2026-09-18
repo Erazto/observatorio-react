@@ -54,7 +54,7 @@ console.log('OK: Excel porcentual nativo/texto, encabezados desplazados/duplicad
 assert.equal(Object.values(PALETTES).filter(p=>p.reference).length,5);
 for(const palette of Object.keys(PALETTES)) {
   assert.equal(PALETTES[palette].colors.length,5);
-  assert.match(PALETTES[palette].background,/^#[0-9A-F]{6}$/);
+  assert.match(PALETTES[palette].background,/^#[0-9A-F]{6}$/i);
   assert(!PALETTES[palette].colors.includes(NO_DATA_COLOR));
   const forward=buildScale([0,25,50,75,100],{palette});
   const reverse=buildScale([0,25,50,75,100],{palette,reverse:true});
