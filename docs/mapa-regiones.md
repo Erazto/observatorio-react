@@ -82,3 +82,11 @@ El PNG institucional tiene transparencia exterior y un área blanca detrás del 
 El fondo cambia en el mapa, el panel de valores y la presentación. Se aplica al contenedor, nunca al SVG ni al lienzo del PNG, cuya transparencia se mantiene. Invertir colores solo invierte los cinco estratos, no el fondo ni sin dato.
 
 Validación de las gamas: pruebas de cinco colores por escala e inversión sin cambiar cortes, compilación y Chrome. Se verificaron los cinco fondos de referencia y se exportó un PNG por gama con alfa cero en el fondo. La presentación conservó el fondo seleccionado en escritorio y móvil, además de tooltip y barras de mínimos. Se inspeccionó la captura con la gama Marginación. La prueba espera el ajuste de tamaño de la ventana antes de medir límites del tooltip; este usa ancho de contenido limitado al viewport.
+
+### Ajuste de gamas y límites municipales
+
+La opción institucional se llama «Institucional»; «Resiliencia · Aqua (adaptada)» pasa a «Aqua» y se elimina el aqua anterior. La opción azul se sustituye por «Verde oliva matizado» (`#F2F6E8`, `#D5E2B8`, `#A6BF78`, `#6F8C43`, `#3D5726`). «Naranjas» reemplaza la mezcla naranja/guinda con cinco tonos de naranja (`#FFF0DF`, `#FDD0A2`, `#FDA45B`, `#E87524`, `#A94708`), conservando su fondo beige. Las demás gamas no cambian.
+
+Los municipios con luminancia relativa sRGB menor de 0.22 usan contorno gris claro `#D1D5DB`; los claros mantienen el contorno `#475569`. Se evalúa el relleno final, por lo que la inversión también actualiza los contornos. La presentación y el PNG clonan esos estilos y preservan los bordes; el fondo del PNG sigue transparente.
+
+Publicación del 18 de septiembre: se conservan los nombres editados por el usuario en `label` y el selector sin agrupaciones. Se corrige únicamente «Naranajas» a «Naranjas». Los identificadores internos y los valores hexadecimales permanecen separados de esos nombres. Se verificaron de nuevo las pruebas de datos/colores y la compilación de los archivos incluidos en la publicación, aislada de los demás cambios locales.

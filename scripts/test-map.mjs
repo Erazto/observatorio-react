@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import XLSX from 'xlsx';
 const load=path=>import('data:text/javascript;base64,'+fs.readFileSync(path).toString('base64'));
 const {parseMapNumber,inspectMapGrid,worksheetGrid,normalizeMunicipality,readFirstMapSheet}=await load('src/utils/mapData.js');
-const {classBreaks,buildScale,pearson,bivariateColor,PALETTES,NO_DATA_COLOR}=await load('src/utils/mapColors.js');
+const {classBreaks,buildScale,pearson,bivariateColor,PALETTES,NO_DATA_COLOR,municipalityStroke}=await load('src/utils/mapColors.js');
 assert.equal(parseMapNumber('25%'),25);
 assert.equal(parseMapNumber('12,5%'),12.5);
 assert.equal(parseMapNumber('  '),null);
@@ -90,3 +90,15 @@ assert.equal(PALETTES.resiliencia.background,'#B5B4C4');
 assert.equal(PALETTES.resiliencia_aqua.background,'#95BBB8');
 assert.deepEqual(PALETTES.institucional.colors,['#C4B18F','#BC965B','#965F36','#9F2141','#54212C']);
 console.log('OK: cinco gamas de referencia y fondos para visualización.');
+
+assert.equal(PALETTES.institucional.label,'Institucional');
+assert.equal(PALETTES.resiliencia_aqua.label,'Aqua');
+assert(!PALETTES.aqua && !PALETTES.azules);
+assert.equal(Object.values(PALETTES).filter(p=>p.label==='Aqua').length,1);
+assert.equal(municipalityStroke('#54212C'),'#D1D5DB');
+assert.equal(municipalityStroke('#FFF0DF'),'#475569');
+for(const palette of Object.values(PALETTES)) {
+  assert.equal(municipalityStroke(palette.colors.at(-1)),'#D1D5DB');
+  assert.equal(municipalityStroke(palette.colors[0]),'#475569');
+}
+console.log('OK: naranja monocromático, verde oliva, aqua único y contornos claros en tonos oscuros.');

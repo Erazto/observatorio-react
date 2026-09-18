@@ -1,16 +1,26 @@
 // Colores de las referencias convertidos a sRGB. Los JPG pueden variar ligeramente por compresión.
 export const PALETTES = {
-  institucional: { label: 'Institucional · Tierra y guinda', reference: true, background: '#FFFFFF', heading: '#54212C', colors: ['#C4B18F', '#BC965B', '#965F36', '#9F2141', '#54212C'] },
-  marginacion: { label: 'Marginación · Rosas', reference: true, background: '#CDAEB8', heading: '#3C0318', colors: ['#FFDBD8', '#F6C3CF', '#C6667F', '#5F1729', '#3C0318'] },
-  pobreza: { label: 'Pobreza · Naranja y guinda', reference: true, background: '#CFBAA5', heading: '#42061B', colors: ['#E8DCD3', '#D2AA8E', '#CB7034', '#611B2A', '#42061B'] },
-  resiliencia: { label: 'Grado de resiliencia · Lilas', reference: true, background: '#B5B4C4', heading: '#212029', colors: ['#F0F0F2', '#BFBFBF', '#A4A1B8', '#4F4C64', '#212029'] },
-  resiliencia_aqua: { label: 'Resiliencia · Aqua (adaptada)', reference: true, background: '#95BBB8', heading: '#174C44', description: 'Cinco tonos inspirados en la referencia de resiliencia. Esta gama es una adaptación para valores ordenados; no representa las categorías del clúster.', colors: ['#DFEFE5', '#78CCB4', '#6A8DA0', '#249383', '#1A6D63'] },
+  institucional: { label: 'Institucional', reference: true, background: '#FFFFFF', heading: '#54212C', colors: ['#C4B18F', '#BC965B', '#965F36', '#9F2141', '#54212C'] },
+  marginacion: { label: 'Rosas', reference: true, background: '#CDAEB8', heading: '#3C0318', colors: ['#FFDBD8', '#F6C3CF', '#C6667F', '#5F1729', '#3C0318'] },
+  pobreza: { label: 'Naranjas', reference: true, background: '#CFBAA5', heading: '#42061B', colors: ['#FFF0DF', '#FDD0A2', '#FDA45B', '#E87524', '#A94708'] },
+  resiliencia: { label: 'Morados', reference: true, background: '#B5B4C4', heading: '#212029', colors: ['#F0F0F2', '#BFBFBF', '#A4A1B8', '#4F4C64', '#212029'] },
+  resiliencia_aqua: { label: 'Aqua', reference: true, background: '#95BBB8', heading: '#174C44', description: 'Cinco tonos inspirados en la referencia de resiliencia. Esta gama es una adaptación para valores ordenados; no representa las categorías del clúster.', colors: ['#DFEFE5', '#78CCB4', '#6A8DA0', '#249383', '#1A6D63'] },
   categoria1: { label: 'Verde', background: '#F8FAFC', heading: '#56212F', colors: ['#EDF7F0', '#CDE9D6', '#61BA7D', '#245232', '#16321F'] },
-  azules: { label: 'Azul', background: '#F8FAFC', heading: '#56212F', colors: ['#EFF6FF', '#BFDBFE', '#60A5FA', '#2563EB', '#1E3A8A'] },
-  lilas: { label: 'Lilas', background: '#F8FAFC', heading: '#56212F', colors: ['#F5F0FA', '#DDD0ED', '#B49ACF', '#805BA6', '#48256B'] },
-  aqua: { label: 'Aqua', background: '#F8FAFC', heading: '#56212F', colors: ['#ECFDFB', '#B5EAE3', '#58C4B8', '#218579', '#125249'] },
+  verde_oliva: { label: 'Lilas', background: '#F8FAFC', heading: '#31451D', colors: ['#F2F6E8', '#D5E2B8', '#A6BF78', '#6F8C43', '#3D5726'] },
+  lilas: { label: 'Menta', background: '#F8FAFC', heading: '#56212F', colors: ['#F5F0FA', '#DDD0ED', '#B49ACF', '#805BA6', '#48256B'] },
 };
 export const NO_DATA_COLOR = '#D1D5DB';
+// Contraste del contorno según el color final, también después de invertir la gama.
+export function municipalityStroke(fill) {
+  const rgb=fill.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if(!rgb)return '#475569';
+  const linear=rgb.slice(1).map(value=>{
+    const channel=parseInt(value,16)/255;
+    return channel<=0.04045?channel/12.92:((channel+0.055)/1.055)**2.4;
+  });
+  const luminance=linear[0]*0.2126+linear[1]*0.7152+linear[2]*0.0722;
+  return luminance<0.22?'#D1D5DB':'#475569';
+}
 export const METHODS = { quantiles: 'Cuantiles', equal: 'Intervalos iguales', dalenius: 'Dalenius–Hodges' };
 export function classBreaks(values, method = 'quantiles') {
   const nums = values.filter(Number.isFinite).sort((a,b) => a-b);

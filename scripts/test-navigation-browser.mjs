@@ -107,13 +107,14 @@ try {
       },...args);
     };
     var originalSerialize=XMLSerializer.prototype.serializeToString;
-    XMLSerializer.prototype.serializeToString=function(node){window.__exportPathCount=node.querySelectorAll('path[id]').length;return originalSerialize.call(this,node)};
+    XMLSerializer.prototype.serializeToString=function(node){window.__exportPathCount=node.querySelectorAll('path[id]').length;window.__exportStrokeMatch=[...node.querySelectorAll('path[id]')].every(p=>p.style.stroke===document.getElementById(p.id)?.style.stroke);return originalSerialize.call(this,node)};
   `)
   const checkExport = async (count, name) => {
     await run(`window.__exportPNG=null;window.__exportTexts=[];[...document.querySelectorAll('button')].find(b=>b.textContent==='Exportar región (PNG)').click()`)
     await wait('!!window.__exportPNG')
     assert.equal(await run('window.__exportAlpha'), 0)
     assert.equal(await run('window.__exportPathCount'), count)
+    assert.equal(await run('window.__exportStrokeMatch'),true)
     const texts=await run('window.__exportTexts')
     assert(!texts.some(t=>/Región:|Archivo:/.test(t.text)))
     const credit=texts.find(t=>t.text.includes('Diseño realizado'))
@@ -130,6 +131,7 @@ try {
     await wait('document.querySelector(".map-presentation").open')
     if(!fallback)await wait('document.fullscreenElement===document.querySelector(".map-presentation-sheet")')
     assert.equal(await run('document.querySelectorAll(".map-presentation-map path").length'),count)
+    assert.equal(await run(`[...document.querySelectorAll('.map-presentation-map path')].every(p=>p.style.stroke===document.getElementById(p.dataset.municipality)?.style.stroke)`),true)
     assert.equal(await run('document.querySelectorAll(".map-presentation-legend li").length'),6)
     assert.equal(await run(`getComputedStyle(document.querySelector('.map-presentation-sheet')).backgroundColor===getComputedStyle(document.querySelector('.mapa-map-panel')).backgroundColor`),true)
 
@@ -170,6 +172,15 @@ try {
     await wait(`getComputedStyle(document.querySelector('.mapa-map-panel')).backgroundColor===${JSON.stringify(background)}`)
     assert.equal(await run(`document.querySelectorAll('.mapa-legend span').length`),6)
     await checkExport(125,palette)
+  }
+  await change('.mapa-color-controls select','verde_oliva')
+  await checkExport(125,'verde-oliva')
+  const paletteLabels=await run(`[...document.querySelector('.mapa-color-controls select').options].map(o=>o.textContent)`)
+  assert.equal(paletteLabels.filter(label=>label==='Aqua').length,1)
+  assert(!paletteLabels.includes('Azul'))
+  for(let i=0;i<2;i++) {
+    await run(`document.querySelector('.mapa-invert-control button').click()`)
+    await wait(`(()=>{const strokes=[...document.querySelectorAll('.mapa-svg-wrapper path')].map(p=>getComputedStyle(p).stroke);return strokes.includes('rgb(209, 213, 219)')&&strokes.includes('rgb(71, 85, 105)')})()`)
   }
   await change('.mapa-color-controls select','marginacion')
   await checkExport(125,'estado')

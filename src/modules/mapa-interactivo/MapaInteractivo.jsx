@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useId } from 'react';
-import { PALETTES, METHODS, NO_DATA_COLOR, buildScale } from '../../utils/mapColors';
+import { PALETTES, METHODS, NO_DATA_COLOR, buildScale, municipalityStroke } from '../../utils/mapColors';
 import { normalizeMunicipality as normalize, parseMapNumber, readFirstMapSheet } from '../../utils/mapData';
 import { buildRankingBars } from '../../utils/rankingBars';
 import { exportMapPNG } from '../../utils/exportMap';
@@ -72,7 +72,8 @@ export default function MapaInteractivo() {
     paths.forEach(el=>{
       const r=dataMap.get(el.id),included=!selectedSet.size||selectedSet.has(el.id);
       const text=`${r?.name||el.id.replace(/_/g,' ')}\n${x?.label||'Valor'}: ${format(r?.x,x?.percent)}`;
-      el.style.fill=getColor(r);el.style.opacity=included?'1':'0.12';el.style.stroke='#475569';el.style.strokeWidth='0.7';el.style.cursor='pointer';
+      const fill=getColor(r);
+      el.style.fill=fill;el.style.opacity=included?'1':'0.12';el.style.stroke=municipalityStroke(fill);el.style.strokeWidth='0.7';el.style.cursor='pointer';
       el.setAttribute('tabindex','0');el.setAttribute('role','button');el.setAttribute('aria-pressed',String(selectedSet.has(el.id)));el.setAttribute('aria-label',text);
       const show=(left,top)=>{const t=tooltipRef.current;t.textContent=text;t.style.display='block';t.style.left=`${Math.max(8,Math.min(left+12,window.innerWidth-t.offsetWidth-8))}px`;t.style.top=`${Math.max(8,Math.min(top+12,window.innerHeight-t.offsetHeight-8))}px`;};
       el.onmouseenter=e=>show(e.clientX,e.clientY);el.onmousemove=e=>show(e.clientX,e.clientY);el.onmouseleave=hideTooltip;
@@ -120,7 +121,7 @@ export default function MapaInteractivo() {
       </section>}
       {dataset&&<>
       <fieldset className="mapa-color-controls"><legend>2. Elige cómo agrupar los valores en colores</legend>
-        <label>Gama<select className="mapa-input" value={palette} onChange={e=>setPalette(e.target.value)}>{[true,false].map(reference=><optgroup key={String(reference)} label={reference?'Mapas de referencia':'Gamas anteriores'}>{Object.entries(PALETTES).filter(([,p])=>!!p.reference===reference).map(([id,p])=><option key={id} value={id}>{p.label}</option>)}</optgroup>)}</select></label><div className="mapa-invert-control">
+        <label>Gama<select className="mapa-input" value={palette} onChange={e=>setPalette(e.target.value)}>{Object.entries(PALETTES).map(([id,p])=><option key={id} value={id}>{p.label}</option>)}</select></label><div className="mapa-invert-control">
           <button type="button" className="mapa-btn mapa-btn--outline" aria-pressed={reverse} onClick={()=>setReverse(value=>!value)}>
             <span aria-hidden="true">⇄</span> {reverse?'Restaurar colores':'Invertir colores'}
           </button>
