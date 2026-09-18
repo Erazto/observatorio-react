@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const SECTIONS = new Set(['estudiantes', 'docentes', 'escuelas', 'planes', 'mapa'])
+const SECTIONS = new Set(['estudiantes', 'docentes', 'escuelas', 'mapa'])
 const sectionFromHash = () => window.location.hash.slice(1)
 
 export function useSectionNavigation() {

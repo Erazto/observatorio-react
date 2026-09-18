@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import DocentesSection from './modules/DocentesSection'
 import EstudiantesSection from './modules/EstudiantesSection'
 import EscuelasSection from './modules/EscuelasSection'
-import PlanesSection from './modules/PlanesSection'
+// import PlanesSection from './modules/PlanesSection'
 const MapaInteractivoSection = lazy(() => import('./modules/MapaInteractivoSection'))
 
 import cifras from './data/cifras.generated.json'
@@ -19,7 +19,7 @@ function App() {
   const { docentes: docentesData, estudiantes: estudiantesData, escuelas: escuelasData } = cifras[ciclo]
   const [activeSection, navigate] = useSectionNavigation()
   const [mapVisited, setMapVisited] = useState(activeSection === 'mapa')
-  const [welcomeOpen, setWelcomeOpen] = useState(() => !window.location.hash)
+  const [welcomeOpen, setWelcomeOpen] = useState(false)
 
   useEffect(() => {
     if (activeSection === 'mapa') setMapVisited(true)
@@ -28,7 +28,7 @@ function App() {
   const docentesRef = useRef(null)
   const estudiantesRef = useRef(null)
   const escuelasRef = useRef(null)
-  const planesRef = useRef(null)
+  // const planesRef = useRef(null)
   const mapaRef = useRef(null)
 
   const handleNavClick = (sectionId) => {
@@ -83,7 +83,8 @@ function App() {
           <span className="text">3. Escuelas</span>
         </button>
 
-        <button
+        {/* Oculto temporalmente: 4. Planes y Programas */}
+        {/* <button
           className={`nav-btn ${activeSection === 'planes' ? 'active' : ''}`}
           onClick={() => handleNavClick('planes')}
           aria-current={activeSection === 'planes' ? 'page' : undefined}
@@ -91,7 +92,7 @@ function App() {
         >
           <Icon name="book-open" className="icon" aria-hidden="true" />
           <span className="text">4. Planes y Programas</span>
-        </button>
+        </button> */}
 
         <button
           className={`nav-btn ${activeSection === 'mapa' ? 'active' : ''}`}
@@ -190,10 +191,11 @@ function App() {
           sectionRef={escuelasRef}
         />
 
-        <PlanesSection
+        {/* Oculto temporalmente: 4. Planes y Programas */}
+        {/* <PlanesSection
           isActive={activeSection === 'planes'}
           sectionRef={planesRef}
-        />
+        /> */}
 
         {/* NUEVA SECCIÓN: MAPA INTERACTIVO */}
         {(mapVisited || activeSection === 'mapa') && <Suspense fallback={activeSection === 'mapa' ? <p role="status">Cargando mapa…</p> : null}>
